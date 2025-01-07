@@ -14,6 +14,8 @@ import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -24,6 +26,11 @@ import net.minecraft.world.phys.Vec3;
 import tfar.idealist.init.ModEntityTypes;
 
 public class AnimatedBlockEntity extends PathfinderMob {
+
+    //- When a player tries to mine a diamond, the diamond ore block grows arms and legs and starts running away.
+    // To get the diamond the player has to chase the diamond ore block and kill it.
+    // The diamond ore block has 20 health and runs at 1.5x the speed of a player.
+    // Once you kill the diamond ore block the objective is complete.
 
     private BlockState blockState = Blocks.SAND.defaultBlockState();
 
@@ -50,6 +57,10 @@ public class AnimatedBlockEntity extends PathfinderMob {
         super.registerGoals();
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
 
+    }
+
+    public static AttributeSupplier.Builder create() {
+        return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH,20).add(Attributes.MOVEMENT_SPEED,.4);
     }
 
     public void setStartPos(BlockPos startPos) {

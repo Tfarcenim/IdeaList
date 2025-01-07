@@ -3,16 +3,21 @@ package tfar.idealist;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -23,16 +28,21 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import tfar.idealist.client.ClientPacketHandler;
+import tfar.idealist.client.ModClient;
 import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.entity.AnimatedBlockEntity;
 import tfar.idealist.init.ModEntityTypes;
+import tfar.idealist.network.PacketHandler;
+import tfar.idealist.network.S2CShuffleHotbarPacket;
+import tfar.idealist.platform.PacketHandlerNeoForge;
+import tfar.idealist.platform.Services;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 @Mod(IdeaList.MOD_ID)
@@ -47,6 +57,7 @@ public class IdeaListNeoForge {
         eventBus.addListener(this::setup);
         eventBus.addListener(this::registerObjs);
         eventBus.addListener(this::createAttr);
+        eventBus.addListener(PacketHandlerNeoForge::register);
         if (dist.isClient()) {
             ModClientNeoForge.init(eventBus);
         }
@@ -75,11 +86,15 @@ public class IdeaListNeoForge {
             NeoForge.EVENT_BUS.addListener(this::leftClickBlock);
         }
 
+        if (IdeaConfig.INVENTORY_SHUFFLE) {
+            NeoForge.EVENT_BUS.addListener(this::attackerShuffle);
+        }
+
 
     }
 
     void createAttr(EntityAttributeCreationEvent event) {
-        event.put(ModEntityTypes.ANIMATED_BLOCK, Mob.createMobAttributes().build());
+        event.put(ModEntityTypes.ANIMATED_BLOCK, AnimatedBlockEntity.create().build());
     }
 
     //- When a player tries to kill a cow, the cow stops moving and looks at the player,
@@ -92,13 +107,35 @@ public class IdeaListNeoForge {
         DamageSource source = event.getSource();
         Entity attacker = source.getEntity();
 
-        if (target instanceof Cow cow && attacker instanceof Player playerAttacker) {
+        if (attacker instanceof Player playerAttacker && target instanceof Cow cow) {
             cow.getNavigation().stop();
             cow.getLookControl().setLookAt(playerAttacker);
             event.setCanceled(true);
              for (int i = 0; i < 9;i++) {
 
              }
+        }
+    }
+
+    //When a player tries to kill another player, their hotbar starts randomly shifting around
+    void attackerShuffle(AttackEntityEvent event) {
+        Entity target = event.getTarget();
+        Player playerAttacker = event.getEntity();
+        if (target instanceof Player) {
+            Inventory inventory = playerAttacker.getInventory();
+            List<ItemStack> shuffled = new ArrayList<>();
+            int size = 9;
+            for (int i = 0; i < size;i++) {
+                shuffled.add(inventory.items.get(i));
+                inventory.items.set(i,ItemStack.EMPTY);
+            }
+            Collections.shuffle(shuffled);
+            for (int i = 0; i < size;i++) {
+                inventory.items.set(i,shuffled.get(i));
+            }
+            if (!(playerAttacker instanceof ServerPlayer)) {
+                ClientPacketHandler.handleHotbarShift();
+            }
         }
     }
 
