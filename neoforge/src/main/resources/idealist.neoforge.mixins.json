@@ -1,11 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.example.examplemod.mixin",
+  "package": "tfar.idealist.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "tfar.idealist.mixin.MixinTitleScreen"
   ],
   "server": [],
   "injectors": {
