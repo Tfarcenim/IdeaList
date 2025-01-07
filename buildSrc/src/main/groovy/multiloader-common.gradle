@@ -49,6 +49,16 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+
+
+    maven {//geckolib
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    maven {
+        name = "Fuzs Mod Resources"
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
+
 }
 
 // Declare capabilities on the outgoing configurations.

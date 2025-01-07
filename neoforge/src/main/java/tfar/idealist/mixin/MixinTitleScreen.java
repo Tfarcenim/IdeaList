@@ -1,6 +1,6 @@
-package com.example.examplemod.mixin;
+package tfar.idealist.mixin;
 
-import com.example.examplemod.Constants;
+import tfar.idealist.IdeaList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TitleScreen.class)
 public class MixinTitleScreen {
-    
+
     @Inject(at = @At("HEAD"), method = "init()V")
     private void init(CallbackInfo info) {
-        
-        Constants.LOG.info("This line is printed by an example mod mixin from Fabric!");
-        Constants.LOG.info("MC Version: {}", Minecraft.getInstance().getVersionType());
+
+        IdeaList.LOG.info("This line is printed by an example mod mixin from NeoForge!");
+        IdeaList.LOG.info("MC Version: {}", Minecraft.getInstance().getVersionType());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.examplemod.platform.services;
+package tfar.idealist.platform.services;
 
 public interface IPlatformHelper {
 
