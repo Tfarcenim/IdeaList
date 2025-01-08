@@ -1,8 +1,13 @@
 package tfar.idealist;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.idealist.init.ModEntityTypes;
@@ -23,6 +28,10 @@ public class IdeaList {
     // code that gets invoked by the entry point of the loader specific projects.
     public static void init() {
         Services.PLATFORM.registerAll(ModEntityTypes.class, BuiltInRegistries.ENTITY_TYPE,cast(EntityType.class));
+    }
+
+    public static void onBrushingCompleted(Player player, BlockPos pos, Level level) {
+        EntityType.WARDEN.spawn((ServerLevel) level,pos, MobSpawnType.EVENT);
     }
 
     @SuppressWarnings("unchecked")
