@@ -59,6 +59,15 @@ repositories {
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
 
+    maven {
+        name = 'enginehub-maven'
+        url = 'https://maven.enginehub.org/repo/'
+
+        //   content {
+        //includeGroup "com.sk89q.worldedit"
+        //   }
+    }
+
 }
 
 // Declare capabilities on the outgoing configurations.

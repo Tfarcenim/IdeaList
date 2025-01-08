@@ -139,6 +139,11 @@ public class IdeaListNeoForge {
         }
     }
 
+    //- When a player tries to trade with a piglin,
+    // the piglin takes the gold and runs away really fast building a complex parkour course with lava under it and waits at the end of it.
+    // The player has to complete the parkour course and make it to the piglin in order for the piglin to complete the trade.
+    // (the player cannot place blocks while this challenge is active).
+
     void leftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         Player player = event.getEntity();
         BlockPos pos = event.getPos();
