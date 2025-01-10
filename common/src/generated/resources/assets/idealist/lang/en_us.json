@@ -1,0 +1,10 @@
+{
+  "advancements.idealist.kill_cow.description": "Kill Cow",
+  "advancements.idealist.kill_cow.title": "Kill Cow",
+  "advancements.idealist.kill_player.description": "Kill Player",
+  "advancements.idealist.kill_player.title": "Kill Player",
+  "death.attack.rose": "%1$s was pricked to death",
+  "death.attack.rose.player": "%1$s walked into a rose bush while trying to escape %2$s",
+  "item.idealist.bingo_card": "Bingo Card",
+  "sleep.too_big": "Too big to sleep in this bed"
+}

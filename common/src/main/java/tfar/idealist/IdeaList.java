@@ -4,13 +4,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.idealist.init.ModEntityTypes;
+import tfar.idealist.init.ModItems;
 import tfar.idealist.platform.Services;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -28,10 +35,26 @@ public class IdeaList {
     // code that gets invoked by the entry point of the loader specific projects.
     public static void init() {
         Services.PLATFORM.registerAll(ModEntityTypes.class, BuiltInRegistries.ENTITY_TYPE,cast(EntityType.class));
+        Services.PLATFORM.registerAll(ModItems.class, BuiltInRegistries.ITEM, Item.class);
+
     }
 
     public static void onBrushingCompleted(Player player, BlockPos pos, Level level) {
-        EntityType.WARDEN.spawn((ServerLevel) level,pos, MobSpawnType.EVENT);
+        if (IdeaConfig.T_REX) {
+            EntityType.WARDEN.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
+        }
+    }
+
+    public static void onEndPortalCompleted(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        if (IdeaConfig.PORTAL_QUIZ) {
+            Player player = context.getPlayer();
+            Level level = context.getLevel();
+            if (player != null) {
+                cir.setReturnValue(InteractionResult.CONSUME);//don't construct the portal yet
+                EnderMan enderMan = EntityType.ENDERMAN.spawn((ServerLevel) level, player.blockPosition(), MobSpawnType.EVENT);
+                enderMan.setItemSlot(EquipmentSlot.HEAD,ModItems.PURPLE_GLASSES.getDefaultInstance());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -44,7 +67,7 @@ public class IdeaList {
     }
 }
 
-//- When a player tries to kill a cow, the cow stops moving and looks at the player, then the cow along with a bunch of other cows in the “area” bunch up together to form a giant cow mech (the other cows don’t have to be there already, have it so they spawn nearby when the cow is hit then they all rush towards the cow that was hit). The cow mech can shoot lasers out of its eyes for 10 seconds at a time (cooldown 10 seconds) causing half a heart of damage a hit. The cow mech has 150 health.
+//- When a player tries to kill a cow, the cow stops moving and looks at the player, then the cow along with a bunch of other cows in the "area" bunch up together to form a giant cow mech (the other cows don’t have to be there already, have it so they spawn nearby when the cow is hit then they all rush towards the cow that was hit). The cow mech can shoot lasers out of its eyes for 10 seconds at a time (cooldown 10 seconds) causing half a heart of damage a hit. The cow mech has 150 health.
 //
 //
 //

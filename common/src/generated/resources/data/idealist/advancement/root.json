@@ -1,0 +1,26 @@
+{
+  "criteria": {
+    "unlock_right_away": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "display": {
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+    "description": {
+      "translate": "advancements.idealist.root.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "idealist:bingo_card"
+    },
+    "title": {
+      "translate": "advancements.idealist.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "unlock_right_away"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

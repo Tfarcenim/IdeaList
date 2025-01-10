@@ -6,6 +6,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -77,5 +78,9 @@ public class ModClient {
                     RenderSystem.disableBlend();
                 }
         }
+    }
+
+    public static void openBingoScreen() {
+        Minecraft.getInstance().setScreen(new BingoScreen(Component.literal("Bingo")));
     }
 }
