@@ -1,0 +1,44 @@
+{
+  "parent": "idealist:root",
+  "criteria": {
+    "plant_wheat_seeds": {
+      "conditions": {
+        "location": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "block": {
+                "blocks": "minecraft:farmland"
+              }
+            }
+          },
+          {
+            "condition": "minecraft:match_tool",
+            "predicate": {
+              "items": "minecraft:wheat_seeds"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:item_used_on_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.idealist.plant_wheat.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:wheat"
+    },
+    "title": {
+      "translate": "advancements.idealist.plant_wheat.title"
+    }
+  },
+  "requirements": [
+    [
+      "plant_wheat_seeds"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

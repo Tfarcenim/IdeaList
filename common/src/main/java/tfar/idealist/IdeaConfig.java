@@ -25,7 +25,14 @@ public class IdeaConfig {
         public static final ResourceLocation KILL_COW = IdeaList.id("kill_cow");
         public static final ResourceLocation MINE_DIAMOND = IdeaList.id("mine_diamond");
         public static final ResourceLocation KILL_PLAYER = IdeaList.id("kill_player");
+
         public static final ResourceLocation TRADE_PIGLIN = IdeaList.id("trade_piglin");
+        public static final ResourceLocation BRUSH_SUSPICIOUS_SAND = ResourceLocation.withDefaultNamespace("adventure/salvage_sherd");//IdeaList.id("brush_suspicious_sand");
+        public static final ResourceLocation ENTER_THE_END = IdeaList.id("enter_the_end");
+
+        public static final ResourceLocation SHOOT_A_TARGET = IdeaList.id("shoot_a_target");
+        public static final ResourceLocation COMPLETE_A_RAID = IdeaList.id("complete_a_raid");
+        public static final ResourceLocation GROW_WHEAT = IdeaList.id("grow_wheat");
     }
 
     public static class Server {
@@ -45,11 +52,11 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_1 = builder.define("bingo_advancement_1",Defaults.MINE_DIAMOND.toString());
             BINGO_ADVANCEMENT_2 = builder.define("bingo_advancement_2",Defaults.KILL_PLAYER.toString());
             BINGO_ADVANCEMENT_3 = builder.define("bingo_advancement_3",Defaults.TRADE_PIGLIN.toString());
-            BINGO_ADVANCEMENT_4 = builder.define("bingo_advancement_4","adventure/salvage_sherd");
-            BINGO_ADVANCEMENT_5 = builder.define("bingo_advancement_5","story/root");
-            BINGO_ADVANCEMENT_6 = builder.define("bingo_advancement_6","story/root");
-            BINGO_ADVANCEMENT_7 = builder.define("bingo_advancement_7","story/root");
-            BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8","story/root");
+            BINGO_ADVANCEMENT_4 = builder.define("bingo_advancement_4",Defaults.BRUSH_SUSPICIOUS_SAND.toString());
+            BINGO_ADVANCEMENT_5 = builder.define("bingo_advancement_5", Defaults.ENTER_THE_END.toString());
+            BINGO_ADVANCEMENT_6 = builder.define("bingo_advancement_6", Defaults.SHOOT_A_TARGET.toString());
+            BINGO_ADVANCEMENT_7 = builder.define("bingo_advancement_7", Defaults.COMPLETE_A_RAID.toString());
+            BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
             builder.pop();
         }
     }

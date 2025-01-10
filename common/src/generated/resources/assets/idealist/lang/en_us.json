@@ -1,8 +1,12 @@
 {
+  "advancements.idealist.bullseye.description": "Hit the bullseye of a Target block from at least 50 meters away",
+  "advancements.idealist.bullseye.title": "Bullseye+",
   "advancements.idealist.kill_cow.description": "Kill Cow",
   "advancements.idealist.kill_cow.title": "Kill Cow",
   "advancements.idealist.kill_player.description": "Kill Player",
   "advancements.idealist.kill_player.title": "Kill Player",
+  "advancements.idealist.plant_wheat.description": "Plant wheat seeds on farmland",
+  "advancements.idealist.plant_wheat.title": "Green Thumb",
   "death.attack.rose": "%1$s was pricked to death",
   "death.attack.rose.player": "%1$s walked into a rose bush while trying to escape %2$s",
   "item.idealist.bingo_card": "Bingo Card",

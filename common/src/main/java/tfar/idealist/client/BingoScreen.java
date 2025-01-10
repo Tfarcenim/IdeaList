@@ -26,51 +26,39 @@ public class BingoScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        int x = (this.width - 90) / 2;
+        int x = (this.width - 92) / 2;
         int y = (this.height - 86) / 2;
-        addRenderableWidget(new SimpleAdvancementWidget(x,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_0.get()))));
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_0.get()),0,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_1.get()),1,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_2.get()),2,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_3.get()),3,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_4.get()),4,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_5.get()),5,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_6.get()),6,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_7.get()),7,x,y);
+        maybeAdd(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_8.get()),8,x,y);
+    }
 
-        addRenderableWidget(new SimpleAdvancementWidget(x+30,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_1.get()))));
-
-        addRenderableWidget(new SimpleAdvancementWidget(x+60,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_2.get()))));
-
-        y+=30;
-
-        addRenderableWidget(new SimpleAdvancementWidget(x,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_3.get()))));
-
-        addRenderableWidget(new SimpleAdvancementWidget(x+30,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_4.get()))));
-
-        addRenderableWidget(new SimpleAdvancementWidget(x+60,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_5.get()))));
-
-        y+=30;
-
-        addRenderableWidget(new SimpleAdvancementWidget(x,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_6.get()))));
-
-        addRenderableWidget(new SimpleAdvancementWidget(x+30,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_7.get()))));
-
-        addRenderableWidget(new SimpleAdvancementWidget(x+60,y,20,20,Component.empty(),
-                clientAdvancements.get(ResourceLocation.parse(IdeaConfig.Server.BINGO_ADVANCEMENT_8.get()))));
-
-
+    protected void maybeAdd(ResourceLocation id, int index,int xStart,int yStart) {
+        AdvancementHolder holder = clientAdvancements.get(id);
+        if (holder == null) return;
+        int x = xStart + (index % 3) * 30;
+        int y = yStart + (index / 3) * 30;
+        SimpleAdvancementWidget widget = new SimpleAdvancementWidget(x, y, 24, 24, Component.empty(),
+                clientAdvancements, holder);
+        addRenderableWidget(widget);
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBlurredBackground(partialTick);
         renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
     }
 
         public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        int size = 96;
+        int size = 100;
         int x = (this.width - size) / 2;
         int y = (this.height - size) / 2;
         guiGraphics.blitSprite(BINGO,x,y,size,size);

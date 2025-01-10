@@ -1,17 +1,20 @@
 package tfar.idealist.datagen;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.advancements.AdvancementRequirements;
-import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.packs.VanillaNetherAdvancements;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import tfar.idealist.IdeaConfig;
@@ -99,6 +102,80 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                 )
                 .save(saver, IdeaConfig.Defaults.TRADE_PIGLIN.toString());
 
+        Advancement.Builder.advancement()
+                .parent(root)
+                .display(
+                        Blocks.END_STONE,
+                        Component.translatable("advancements.story.enter_the_end.title"),
+                        Component.translatable("advancements.story.enter_the_end.description"),
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.END))
+                .save(saver, IdeaConfig.Defaults.ENTER_THE_END.toString());
 
+        Advancement.Builder.advancement()
+                .parent(root)
+                .display(
+                        Blocks.TARGET.asItem(),
+                        TextComponents.ADV_BULLSEYE,
+                        TextComponents.ADV_BULLSEYE_DESC,
+                        null,
+                        AdvancementType.CHALLENGE,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion(
+                        "bullseye",
+                        TargetBlockTrigger.TriggerInstance.targetHit(
+                                MinMaxBounds.Ints.exactly(15),
+                                Optional.of(
+                                        EntityPredicate.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50))))
+                                )
+                        )
+                )
+                .save(saver, IdeaConfig.Defaults.SHOOT_A_TARGET.toString());
+
+        HolderLookup.RegistryLookup<BannerPattern> registrylookup = registries.lookupOrThrow(Registries.BANNER_PATTERN);
+
+        Advancement.Builder.advancement()
+                .parent(root)
+                .display(
+                        Raid.getLeaderBannerInstance(registrylookup),
+                        Component.translatable("advancements.adventure.hero_of_the_village.title"),
+                        Component.translatable("advancements.adventure.hero_of_the_village.description"),
+                        null,
+                        AdvancementType.CHALLENGE,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("hero_of_the_village", PlayerTrigger.TriggerInstance.raidWon())
+                .save(saver, IdeaConfig.Defaults.COMPLETE_A_RAID.toString());
+
+        AdvancementHolder advancementholder7 = Advancement.Builder.advancement()
+                .parent(root)
+                .addCriterion(
+                        "plant_wheat_seeds",
+                        ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
+                                LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.FARMLAND)),
+                                ItemPredicate.Builder.item().of(Items.WHEAT_SEEDS)
+                        )
+                )
+                .display(
+                        Items.WHEAT,
+                        TextComponents.PLANT_WHEAT,
+                        TextComponents.PLANT_WHEAT_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .save(saver,IdeaConfig.Defaults.GROW_WHEAT.toString());
     }
 }

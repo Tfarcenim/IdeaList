@@ -2,6 +2,7 @@ package tfar.idealist.datagen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -38,6 +39,12 @@ public class ModLangProvider extends LanguageProvider {
 
         addTextComponent(TextComponents.KILL_PLAYER,"Kill Player");
         addTextComponent(TextComponents.KILL_PLAYER_DESC,"Kill Player");
+
+        addTextComponent(TextComponents.ADV_BULLSEYE,"Bullseye+");
+        addTextComponent(TextComponents.ADV_BULLSEYE_DESC,"Hit the bullseye of a Target block from at least 50 meters away");
+
+        addTextComponent(TextComponents.PLANT_WHEAT,"Green Thumb");
+        addTextComponent(TextComponents.PLANT_WHEAT_DESC,"Plant wheat seeds on farmland");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {
