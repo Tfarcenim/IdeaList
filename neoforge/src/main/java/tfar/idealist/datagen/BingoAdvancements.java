@@ -4,6 +4,7 @@ import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.advancements.packs.VanillaAdventureAdvancements;
 import net.minecraft.data.advancements.packs.VanillaNetherAdvancements;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -177,5 +178,19 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                         false
                 )
                 .save(saver,IdeaConfig.Defaults.GROW_WHEAT.toString());
+
+        AdvancementHolder advancementholder10 = VanillaAdventureAdvancements.respectingTheRemnantsCriterions(Advancement.Builder.advancement())
+                .parent(root)
+                .display(
+                        Items.BRUSH,
+                        Component.translatable("advancements.adventure.salvage_sherd.title"),
+                        Component.translatable("advancements.adventure.salvage_sherd.description"),
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .save(saver, IdeaConfig.Defaults.BRUSH_SUSPICIOUS_SAND.toString());
     }
 }

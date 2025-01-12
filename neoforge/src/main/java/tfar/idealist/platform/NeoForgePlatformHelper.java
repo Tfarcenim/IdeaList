@@ -1,15 +1,19 @@
 package tfar.idealist.platform;
 
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.idealist.IdeaList;
 import tfar.idealist.IdeaListNeoForge;
+import tfar.idealist.PlayerBingoData;
+import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.network.C2SModPacket;
 import tfar.idealist.network.S2CModPacket;
 import tfar.idealist.platform.services.IPlatformHelper;
@@ -49,6 +53,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         }
     }
 
+    @Override
+    public void unfreeze(Registry<?> registry) {
+        ((MappedRegistry<?>)registry).unfreeze();
+    }
+
     public static PayloadRegistrar registrar;
 
     @Override
@@ -72,5 +81,13 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         PacketHandlerNeoForge.sendToServer(msg);
     }
 
+    @Override
+    public void setData(Player player, PlayerBingoData data) {
+        player.setData(AttachmentTypes.PLAYER_BINGO_DATA,data);
+    }
 
+    @Override
+    public PlayerBingoData getData(Player player) {
+        return player.getData(AttachmentTypes.PLAYER_BINGO_DATA);
+    }
 }

@@ -16,6 +16,7 @@ public class PacketHandler {
     public static void registerPackets() {
 
         Services.PLATFORM.registerClientPlayPacket(S2CShuffleHotbarPacket.TYPE, S2CShuffleHotbarPacket.STREAM_CODEC);
+        Services.PLATFORM.registerClientPlayPacket(S2CAttachmentDataPacket.TYPE, S2CAttachmentDataPacket.STREAM_CODEC);
 
 
     }

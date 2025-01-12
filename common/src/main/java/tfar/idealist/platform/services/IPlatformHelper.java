@@ -5,6 +5,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import tfar.idealist.PlayerBingoData;
 import tfar.idealist.network.C2SModPacket;
 import tfar.idealist.network.S2CModPacket;
 
@@ -47,7 +49,12 @@ public interface IPlatformHelper {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
 
+    default void unfreeze(Registry<?> registry) {
+
+    }
+
     default  <F> void registerAll(Class<?> clazz, Registry<F> registry, Class<? extends F> filter) {
+        unfreeze(registry);
         Map<String,F> map = new HashMap<>();
         for (Field field : clazz.getFields()) {
             try {
@@ -69,4 +76,7 @@ public interface IPlatformHelper {
 
     void sendToClient(S2CModPacket<?> msg, ServerPlayer player);
     void sendToServer(C2SModPacket<?> msg);
+
+    void setData(Player player, PlayerBingoData twist);
+    PlayerBingoData getData(Player player);
 }

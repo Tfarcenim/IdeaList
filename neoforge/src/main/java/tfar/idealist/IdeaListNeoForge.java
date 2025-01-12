@@ -1,10 +1,13 @@
 package tfar.idealist;
 
 
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -17,21 +20,33 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.idealist.client.ClientPacketHandler;
@@ -39,6 +54,7 @@ import tfar.idealist.client.ModClient;
 import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
 import tfar.idealist.entity.AnimatedBlockEntity;
+import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.network.PacketHandler;
 import tfar.idealist.network.S2CShuffleHotbarPacket;
@@ -62,14 +78,16 @@ public class IdeaListNeoForge {
         eventBus.addListener(this::createAttr);
         eventBus.addListener(PacketHandlerNeoForge::register);
         eventBus.addListener(ModDatagen::gather);
+        eventBus.addListener(this::configChange);
+        eventBus.addListener(this::config);
         if (dist.isClient()) {
             ModClientNeoForge.init(eventBus);
         }
         // Use NeoForge to bootstrap the Common mod.
-        ((MappedRegistry<?>)BuiltInRegistries.ENTITY_TYPE).unfreeze();
-        ((MappedRegistry<?>)BuiltInRegistries.ITEM).unfreeze();
+        Services.PLATFORM.registerAll(AttachmentTypes.class, NeoForgeRegistries.ATTACHMENT_TYPES, IdeaList.cast(AttachmentType.class));
+        NeoForge.EVENT_BUS.addListener(this::advEarn);
+        NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class,event -> ModCommands.register(event.getDispatcher()));
         IdeaList.init();
-
     }
 
     public void registerObjs(RegisterEvent event) {
@@ -82,20 +100,49 @@ public class IdeaListNeoForge {
         }
     }
 
+    void configChange(ModConfigEvent.Reloading event) {
+        if (event.getConfig().getModId().equals(IdeaList.MOD_ID)) {
+            IdeaConfig.Server.cache();
+        }
+    }
+
+    void config(ModConfigEvent.Loading event) {
+        if (event.getConfig().getModId().equals(IdeaList.MOD_ID)) {
+            IdeaConfig.Server.cache();
+        }
+    }
+
+
     void setup(FMLCommonSetupEvent event) {
         registerLater.clear();
-        if (IdeaConfig.COW_REVENGE) {
-            NeoForge.EVENT_BUS.addListener(this::cowRevenge);
-        }
-        if (IdeaConfig.RUNNING_BLOCKS) {
-            NeoForge.EVENT_BUS.addListener(this::leftClickBlock);
-        }
-
-        if (IdeaConfig.INVENTORY_SHUFFLE) {
-            NeoForge.EVENT_BUS.addListener(this::attackerShuffle);
-        }
+        NeoForge.EVENT_BUS.addListener(this::cowRevenge);
+        NeoForge.EVENT_BUS.addListener(this::leftClickBlock);
+        NeoForge.EVENT_BUS.addListener(this::attackerShuffle);
 
 
+    }
+
+    void advEarn(AdvancementEvent.AdvancementEarnEvent event) {
+        AdvancementHolder holder  = event.getAdvancement();
+        Player player = event.getEntity();
+        if (IdeaConfig.Server.bingoAdvancements.contains(holder.id())) {
+            Vec3 pos = player.position().add(0,2,0);
+            ItemStack stack = Items.FIREWORK_ROCKET.getDefaultInstance();
+
+            FireworkExplosion fireworkExplosion = new FireworkExplosion(FireworkExplosion.Shape.CREEPER, IntList.of(0x00ff00),IntList.of(0x00ff00),true,true);
+            Fireworks fireworks = new Fireworks(4,List.of(fireworkExplosion));
+            stack.set(DataComponents.FIREWORKS,fireworks);
+
+            FireworkRocketEntity fireworkrocketentity = new FireworkRocketEntity(
+                    player.level(),
+                    player,
+                    pos.x,
+                    pos.y,
+                    pos.z,
+                    stack
+            );
+            player.level().addFreshEntity(fireworkrocketentity);
+        }
     }
 
     void createAttr(EntityAttributeCreationEvent event) {
@@ -126,20 +173,22 @@ public class IdeaListNeoForge {
     void attackerShuffle(AttackEntityEvent event) {
         Entity target = event.getTarget();
         Player playerAttacker = event.getEntity();
-        if (target instanceof Player) {
-            Inventory inventory = playerAttacker.getInventory();
-            List<ItemStack> shuffled = new ArrayList<>();
-            int size = 9;
-            for (int i = 0; i < size;i++) {
-                shuffled.add(inventory.items.get(i));
-                inventory.items.set(i,ItemStack.EMPTY);
-            }
-            Collections.shuffle(shuffled);
-            for (int i = 0; i < size;i++) {
-                inventory.items.set(i,shuffled.get(i));
-            }
-            if (!(playerAttacker instanceof ServerPlayer)) {
-                ClientPacketHandler.handleHotbarShift();
+        if (Services.PLATFORM.getData(playerAttacker).twist()) {
+            if (target instanceof Player) {
+                Inventory inventory = playerAttacker.getInventory();
+                List<ItemStack> shuffled = new ArrayList<>();
+                int size = 9;
+                for (int i = 0; i < size; i++) {
+                    shuffled.add(inventory.items.get(i));
+                    inventory.items.set(i, ItemStack.EMPTY);
+                }
+                Collections.shuffle(shuffled);
+                for (int i = 0; i < size; i++) {
+                    inventory.items.set(i, shuffled.get(i));
+                }
+                ///   if (!(playerAttacker instanceof ServerPlayer)) {
+                //      ClientPacketHandler.handleHotbarShift();
+                //  }
             }
         }
     }

@@ -4,6 +4,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class IdeaConfig {
 
     public static final Client CLIENT;
@@ -27,7 +30,7 @@ public class IdeaConfig {
         public static final ResourceLocation KILL_PLAYER = IdeaList.id("kill_player");
 
         public static final ResourceLocation TRADE_PIGLIN = IdeaList.id("trade_piglin");
-        public static final ResourceLocation BRUSH_SUSPICIOUS_SAND = ResourceLocation.withDefaultNamespace("adventure/salvage_sherd");//IdeaList.id("brush_suspicious_sand");
+        public static final ResourceLocation BRUSH_SUSPICIOUS_SAND = IdeaList.id("brush_sand");//IdeaList.id("brush_suspicious_sand");
         public static final ResourceLocation ENTER_THE_END = IdeaList.id("enter_the_end");
 
         public static final ResourceLocation SHOOT_A_TARGET = IdeaList.id("shoot_a_target");
@@ -59,6 +62,22 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
             builder.pop();
         }
+
+        public static Set<ResourceLocation> bingoAdvancements;
+
+        public static void cache() {
+            bingoAdvancements = new HashSet<>(9);
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_0.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_1.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_2.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_3.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_4.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_5.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_6.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_7.get()));
+            bingoAdvancements.add(ResourceLocation.parse(BINGO_ADVANCEMENT_8.get()));
+        }
+
     }
 
     public static class Client {
@@ -67,9 +86,4 @@ public class IdeaConfig {
         }
     }
 
-    public static boolean COW_REVENGE = true;
-    public static boolean RUNNING_BLOCKS = true;
-    public static boolean INVENTORY_SHUFFLE = true;
-    public static boolean T_REX = true;
-    public static boolean PORTAL_QUIZ = true;
 }

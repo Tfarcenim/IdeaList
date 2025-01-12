@@ -40,14 +40,14 @@ public class IdeaList {
     }
 
     public static void onBrushingCompleted(Player player, BlockPos pos, Level level) {
-        if (IdeaConfig.T_REX) {
+        if (Services.PLATFORM.getData(player).twist()) {
             EntityType.WARDEN.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
         }
     }
 
     public static void onEndPortalCompleted(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
-        if (IdeaConfig.PORTAL_QUIZ) {
-            Player player = context.getPlayer();
+        Player player = context.getPlayer();
+        if (Services.PLATFORM.getData(player).twist()) {
             Level level = context.getLevel();
             if (player != null) {
                 cir.setReturnValue(InteractionResult.CONSUME);//don't construct the portal yet
