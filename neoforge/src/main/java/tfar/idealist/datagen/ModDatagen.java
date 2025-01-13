@@ -25,6 +25,7 @@ public class ModDatagen {
         generator.addProvider(true,new ModItemTagsProvider(output,lookupProvider,blockTagsProvider.contentsGetter()));
         generator.addProvider(event.includeClient(),new ModItemModelProvider(output,existingFileHelper));
         generator.addProvider(true,new AdvancementProvider(output,lookupProvider,existingFileHelper, List.of(new BingoAdvancements())));
+        generator.addProvider(true,new ModDataPackProvider(output,lookupProvider));
     }
 
 }

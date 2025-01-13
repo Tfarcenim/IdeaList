@@ -1,24 +1,41 @@
 package tfar.idealist;
 
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.init.ModItems;
 import tfar.idealist.platform.Services;
+
+import java.util.List;
+import java.util.Optional;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -29,6 +46,7 @@ public class IdeaList {
     public static final String MOD_ID = "idealist";
     public static final String MOD_NAME = "IdeaList";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
+    public static final ResourceKey<DimensionType> SEED_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,id("seed"));
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
     // write the majority of your code here and load it from your loader specific projects. This example has some
@@ -39,7 +57,11 @@ public class IdeaList {
 
     }
 
-    public static void onBrushingCompleted(Player player, BlockPos pos, Level level) {
+    public static void onBrushingCompleted(ServerPlayer player, BlockPos pos, Level level) {
+        AdvancementHolder advancement = player.server.getAdvancements().get(IdeaConfig.Defaults.BRUSH_SUSPICIOUS_SAND);
+        if (advancement != null) {
+            AdvancementCommands.Action.GRANT.perform(player, List.of(advancement));
+        }
         if (Services.PLATFORM.getData(player).twist()) {
             EntityType.WARDEN.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
         }
@@ -55,6 +77,69 @@ public class IdeaList {
                 enderMan.setItemSlot(EquipmentSlot.HEAD,ModItems.PURPLE_GLASSES.getDefaultInstance());
             }
         }
+    }
+
+    public static float modifyInaccuracy(float original, LivingEntity entity) {
+        if (entity instanceof Player player && Services.PLATFORM.getData(player).twist()) {
+            Services.PLATFORM.setData(player,Services.PLATFORM.getData(player).incrementShot());
+            int shots = Services.PLATFORM.getData(player).shot_count();
+            if (shots %10 == 0) {
+                return original;
+            }
+            return 25;
+        }
+        return original;
+    }
+
+    public static void overrideRaidSpawns(Raid raid, BlockPos pos, CallbackInfo ci, boolean flag, int i, DifficultyInstance difficultyinstance) {
+        boolean flag1 = raid.shouldSpawnBonusGroup();
+        for (int i1 = 0; i1< Raid.RaiderType.values().length;i1++) {
+            Raid.RaiderType raid$raidertype = Raid.RaiderType.RAVAGER;
+            int j = raid.getDefaultNumSpawns(raid$raidertype, i, flag1)
+                    + raid.getPotentialBonusSpawns(raid$raidertype, raid.random, i, difficultyinstance, flag1);
+            int k = 0;
+
+            for (int l = 0; l < j; l++) {
+                Raider raider = raid$raidertype.entityType.create(raid.getLevel());
+                if (raider == null) {
+                    break;
+                }
+
+                raider.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,MobEffectInstance.INFINITE_DURATION, 1));
+
+                if (!flag && raider.canBeLeader()) {
+                    raider.setPatrolLeader(true);
+                    raid.setLeader(i, raider);
+                    flag = true;
+                }
+
+                raid.joinRaid(i, raider, pos, false);
+                if (raid$raidertype.entityType == EntityType.RAVAGER) {
+                    Raider raider1 = null;
+                    if (i == raid.getNumGroups(Difficulty.NORMAL)) {
+                        raider1 = EntityType.PILLAGER.create(raid.getLevel());
+                    } else if (i >= raid.getNumGroups(Difficulty.HARD)) {
+                        if (k == 0) {
+                            raider1 = EntityType.EVOKER.create(raid.getLevel());
+                        } else {
+                            raider1 = EntityType.VINDICATOR.create(raid.getLevel());
+                        }
+                    }
+
+                    k++;
+                    if (raider1 != null) {
+                        raid.joinRaid(i, raider1, pos, false);
+                        raider1.moveTo(pos, 0.0F, 0.0F);
+                        raider1.startRiding(raider);
+                    }
+                }
+            }
+        }
+
+        raid.waveSpawnPos = Optional.empty();
+        raid.groupsSpawned++;
+        raid.updateBossbar();
+        raid.setDirty();
     }
 
     @SuppressWarnings("unchecked")

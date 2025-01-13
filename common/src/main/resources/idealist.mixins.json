@@ -6,7 +6,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BrushableBlockEntityMixin",
-    "EnderEyeItemMixin"
+    "EnderEyeItemMixin",
+    "ProjectileWeaponMixin",
+    "RaidMixin"
   ],
   "client": [
   ],

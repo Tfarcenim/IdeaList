@@ -4,24 +4,21 @@ package tfar.idealist;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -36,28 +33,22 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
-import tfar.idealist.client.ClientPacketHandler;
-import tfar.idealist.client.ModClient;
 import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
 import tfar.idealist.entity.AnimatedBlockEntity;
 import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.network.PacketHandler;
-import tfar.idealist.network.S2CShuffleHotbarPacket;
+import tfar.idealist.network.S2CAttachmentDataPacket;
 import tfar.idealist.platform.PacketHandlerNeoForge;
 import tfar.idealist.platform.Services;
 
@@ -85,9 +76,19 @@ public class IdeaListNeoForge {
         }
         // Use NeoForge to bootstrap the Common mod.
         Services.PLATFORM.registerAll(AttachmentTypes.class, NeoForgeRegistries.ATTACHMENT_TYPES, IdeaList.cast(AttachmentType.class));
-        NeoForge.EVENT_BUS.addListener(this::advEarn);
-        NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class,event -> ModCommands.register(event.getDispatcher()));
         IdeaList.init();
+    }
+
+    void pickup(ItemEntityPickupEvent.Post event) {
+        ItemEntity entity = event.getItemEntity();
+        Entity thrower = entity.getOwner();
+        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        if (thrower instanceof Piglin) {
+            AdvancementHolder advancement = player.server.getAdvancements().get(IdeaConfig.Defaults.TRADE_PIGLIN);
+            if (advancement != null) {
+                AdvancementCommands.Action.GRANT.perform(player,List.of(advancement));
+            }
+        }
     }
 
     public void registerObjs(RegisterEvent event) {
@@ -112,14 +113,30 @@ public class IdeaListNeoForge {
         }
     }
 
+    void login(PlayerEvent.PlayerLoggedInEvent event) {
+        Player player = event.getEntity();
+        PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), (ServerPlayer) player);
+    }
+
 
     void setup(FMLCommonSetupEvent event) {
         registerLater.clear();
         NeoForge.EVENT_BUS.addListener(this::cowRevenge);
         NeoForge.EVENT_BUS.addListener(this::leftClickBlock);
         NeoForge.EVENT_BUS.addListener(this::attackerShuffle);
+        NeoForge.EVENT_BUS.addListener(this::advEarn);
+        NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class,e -> {
+            ModCommands.register(e.getDispatcher());
+            //SlowLoadSchematicCommand.register(e.getDispatcher());
+        });
+        NeoForge.EVENT_BUS.addListener(this::login);
+        NeoForge.EVENT_BUS.addListener(this::spawn);
+        NeoForge.EVENT_BUS.addListener(this::pickup);
+    }
 
-
+    void spawn(PlayerEvent.PlayerRespawnEvent event) {
+        Player player = event.getEntity();
+        PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), (ServerPlayer) player);
     }
 
     void advEarn(AdvancementEvent.AdvancementEarnEvent event) {
@@ -160,12 +177,14 @@ public class IdeaListNeoForge {
         Entity attacker = source.getEntity();
 
         if (attacker instanceof Player playerAttacker && target instanceof Cow cow) {
-            cow.getNavigation().stop();
-            cow.getLookControl().setLookAt(playerAttacker);
-            event.setCanceled(true);
-             for (int i = 0; i < 9;i++) {
+            if (playerAttacker.getData(AttachmentTypes.PLAYER_BINGO_DATA).twist()) {
+                cow.getNavigation().stop();
+                cow.getLookControl().setLookAt(playerAttacker);
+                event.setCanceled(true);
+                for (int i = 0; i < 9; i++) {
 
-             }
+                }
+            }
         }
     }
 
@@ -202,10 +221,14 @@ public class IdeaListNeoForge {
         Player player = event.getEntity();
         BlockPos pos = event.getPos();
         BlockState state = player.level().getBlockState(event.getPos());
-        if (!player.isCreative() && !state.isAir()) {
+        if (player.getData(AttachmentTypes.PLAYER_BINGO_DATA).twist() && !player.isCreative() && !state.isAir() && state.is(Tags.Blocks.ORES_DIAMOND)) {
             event.setCanceled(true);
             AnimatedBlockEntity run = AnimatedBlockEntity.run(player.level(), pos, state);
             run.hurt(player.damageSources().mobAttack(player),0);
         }
+    }
+
+    void plantSeed(PlayerInteractEvent.RightClickBlock event) {
+
     }
 }

@@ -6,8 +6,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import tfar.idealist.IdeaConfig;
 import tfar.idealist.PlayerBingoData;
 import tfar.idealist.network.C2SModPacket;
+import tfar.idealist.network.S2CAttachmentDataPacket;
 import tfar.idealist.network.S2CModPacket;
 
 import java.lang.reflect.Field;
@@ -78,5 +80,10 @@ public interface IPlatformHelper {
     void sendToServer(C2SModPacket<?> msg);
 
     void setData(Player player, PlayerBingoData twist);
+    default void setAndSyncData(ServerPlayer player,PlayerBingoData data) {
+        setData(player, data);
+        sendToClient(new S2CAttachmentDataPacket(data), player);
+    }
+
     PlayerBingoData getData(Player player);
 }

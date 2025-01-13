@@ -1,6 +1,7 @@
 package tfar.idealist.mixin;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,6 +21,6 @@ public abstract class BrushableBlockEntityMixin extends BlockEntity {
 
     @Inject(method = "brushingCompleted",at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"))
     private void onBrushingCompleted(Player player, CallbackInfo ci) {
-        IdeaList.onBrushingCompleted(player,worldPosition,level);
+        IdeaList.onBrushingCompleted((ServerPlayer) player,worldPosition,level);
     }
 }

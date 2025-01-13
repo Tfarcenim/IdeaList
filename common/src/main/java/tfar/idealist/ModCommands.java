@@ -31,7 +31,7 @@ public class ModCommands {
 
         for (ServerPlayer player : players) {
             PlayerBingoData playerBingoData = Services.PLATFORM.getData(player);
-            Services.PLATFORM.setData(player,playerBingoData.withTwist(twist));
+            Services.PLATFORM.setAndSyncData(player,playerBingoData.withTwist(twist));
         }
 
         return players.size();

@@ -4,13 +4,9 @@ import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.advancements.packs.VanillaAdventureAdvancements;
-import net.minecraft.data.advancements.packs.VanillaNetherAdvancements;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -43,7 +39,7 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
         AdvancementHolder root = Advancement.Builder.advancement()
                 .display(ModItems.BINGO_CARD, TextComponents.ROOT, TextComponents.ROOT_DESC,
                         ResourceLocation.parse("textures/gui/advancements/backgrounds/adventure.png"),
-                        AdvancementType.TASK, true, true, false)
+                        AdvancementType.TASK, true, false, false)
                 .requirements(AdvancementRequirements.Strategy.OR)
                 .addCriterion("unlock_right_away", PlayerTrigger.TriggerInstance.tick())
                 .save(saver, IdeaList.id("root").toString());
@@ -77,7 +73,7 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                 .addCriterion("player_killed_entity", KilledTrigger.TriggerInstance.playerKilledEntity(playerPredicate))
                 .save(saver, IdeaConfig.Defaults.KILL_PLAYER.toString());
 
-        Advancement.Builder.advancement()
+     /*   Advancement.Builder.advancement()
                 .parent(root)
                 .display(
                         Items.GOLD_INGOT,
@@ -92,7 +88,6 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                 .addCriterion(
                         "distract_piglin_directly",
                         PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
-                                Optional.of(VanillaNetherAdvancements.DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE),
                                 ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM),
                                 Optional.of(
                                         EntityPredicate.wrap(
@@ -101,7 +96,21 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                                 )
                         )
                 )
-                .save(saver, IdeaConfig.Defaults.TRADE_PIGLIN.toString());
+                .save(saver, IdeaConfig.Defaults.TRADE_PIGLIN.toString());*/
+
+        AdvancementHolder tradePiglin = Advancement.Builder.advancement()
+                .parent(root)
+                .display(
+                        Items.GOLD_INGOT,
+                        Component.translatable("advancements.nether.distract_piglin.title"),
+                        Component.translatable("advancements.nether.distract_piglin.description"),
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false)
+                .addCriterion("trade_piglin",CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()))
+                .save(saver,IdeaConfig.Defaults.TRADE_PIGLIN.toString());
 
         Advancement.Builder.advancement()
                 .parent(root)
@@ -133,7 +142,7 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                 .addCriterion(
                         "bullseye",
                         TargetBlockTrigger.TriggerInstance.targetHit(
-                                MinMaxBounds.Ints.exactly(15),
+                                MinMaxBounds.Ints.atLeast(2),
                                 Optional.of(
                                         EntityPredicate.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50))))
                                 )
@@ -179,7 +188,7 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                 )
                 .save(saver,IdeaConfig.Defaults.GROW_WHEAT.toString());
 
-        AdvancementHolder advancementholder10 = VanillaAdventureAdvancements.respectingTheRemnantsCriterions(Advancement.Builder.advancement())
+     /*   AdvancementHolder advancementholder10 = VanillaAdventureAdvancements.respectingTheRemnantsCriterions(Advancement.Builder.advancement())
                 .parent(root)
                 .display(
                         Items.BRUSH,
@@ -191,6 +200,20 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
                         true,
                         false
                 )
-                .save(saver, IdeaConfig.Defaults.BRUSH_SUSPICIOUS_SAND.toString());
+                .save(saver, IdeaConfig.Defaults.BRUSH_SUSPICIOUS_SAND.toString());*/
+
+
+        AdvancementHolder brushSand = Advancement.Builder.advancement()
+                .parent(root)
+                .display(Items.BRUSH,
+                        Component.translatable("advancements.adventure.salvage_sherd.title"),
+                        Component.translatable("advancements.adventure.salvage_sherd.description"),
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false)
+                .addCriterion("brush_suspicious_sand",CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()))
+                .save(saver,IdeaConfig.Defaults.BRUSH_SUSPICIOUS_SAND.toString());
     }
 }

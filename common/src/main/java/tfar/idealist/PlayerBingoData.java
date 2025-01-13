@@ -8,24 +8,30 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
-public record PlayerBingoData(boolean twist) {
+public record PlayerBingoData(boolean twist,int shot_count) {
 
     public static final Codec<PlayerBingoData> CODEC = RecordCodecBuilder.create(playerBingoDataInstance ->
             playerBingoDataInstance.group(
-                    Codec.BOOL.fieldOf("twist").forGetter(PlayerBingoData::twist)
+                    Codec.BOOL.fieldOf("twist").forGetter(PlayerBingoData::twist),
+                    Codec.INT.fieldOf("shot_count").forGetter(PlayerBingoData::shot_count)
             ).apply(playerBingoDataInstance,PlayerBingoData::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf,PlayerBingoData> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL,PlayerBingoData::twist,
+            ByteBufCodecs.INT,PlayerBingoData::shot_count,
             PlayerBingoData::new
     );
 
     public PlayerBingoData() {
-        this(true);
+        this(true,0);
     }
 
     public PlayerBingoData withTwist(boolean twist) {
-        return new PlayerBingoData(twist);
+        return new PlayerBingoData(twist,shot_count);
+    }
+
+    public PlayerBingoData incrementShot() {
+        return new PlayerBingoData(twist,shot_count+1);
     }
 
     public Tag save() {
