@@ -17,6 +17,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 import org.codehaus.plexus.util.StringUtils;
 import tfar.idealist.IdeaList;
 import tfar.idealist.TextComponents;
+import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.init.ModItems;
 import tfar.idealist.world.SeedRaidData;
 
@@ -49,6 +50,10 @@ public class ModLangProvider extends LanguageProvider {
          addTextComponent(SeedRaidData.SEED_RAID_NAME_COMPONENT,"Seed Raid");
         addTextComponent(SeedRaidData.SEED_RAID_BAR_VICTORY_COMPONENT,"Seed Raid - Victory");
         addTextComponent(SeedRaidData.SEED_RAID_BAR_DEFEAT_COMPONENT,"Seed Raid - Loss");
+
+        addDefaultEntityType(() -> ModEntityTypes.WORM);
+        //addDefaultEntityType(() -> ModEntityTypes.WORM);
+        addDefaultEntityType(() -> ModEntityTypes.ANT);
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

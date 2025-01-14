@@ -31,6 +31,7 @@ public class ModClientNeoForge {
     static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.ANIMATED_BLOCK,AnimatedBlockRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.WORM,context -> new WormRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("worm"))));
+        event.registerEntityRenderer(ModEntityTypes.ANT,context -> new AntRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("ant"))));
     }
 
 

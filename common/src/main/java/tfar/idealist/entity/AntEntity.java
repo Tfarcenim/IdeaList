@@ -1,6 +1,8 @@
 package tfar.idealist.entity;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -9,6 +11,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -20,13 +25,14 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.constant.DefaultAnimations;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class WormEntity extends PathfinderMob implements GeoEntity {
+public class AntEntity extends PathfinderMob implements GeoEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(AntEntity.class, EntityDataSerializers.BYTE);
 
 
 
-    public WormEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
+    public AntEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -37,13 +43,56 @@ public class WormEntity extends PathfinderMob implements GeoEntity {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_FLAGS_ID, (byte)0);
+    }
+
+    @Override
+    public boolean onClimbable() {
+        return this.isClimbing();
+    }
+
+    public boolean isClimbing() {
+        return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
+    }
+
     public static AttributeSupplier.Builder attributes() {
         return PathfinderMob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE,3)
                 .add(Attributes.MAX_HEALTH,20)
-                .add(Attributes.MOVEMENT_SPEED, 0.25F)
-                .add(Attributes.FOLLOW_RANGE, 96);
+                .add(Attributes.MOVEMENT_SPEED, 0.3F)
+                .add(Attributes.FOLLOW_RANGE, 16);
     }
+
+    @Override
+    public void setJumping(boolean jumping) {
+        super.setJumping(jumping);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide) {
+            this.setClimbing(this.horizontalCollision);
+        }
+    }
+
+    /**
+     * Updates the WatchableObject (Byte) created in entityInit(), setting it to 0x01 if par1 is true or 0x00 if it is false.
+     */
+    public void setClimbing(boolean climbing) {
+        byte b0 = this.entityData.get(DATA_FLAGS_ID);
+        if (climbing) {
+            b0 = (byte)(b0 | 1);
+        } else {
+            b0 = (byte)(b0 & -2);
+        }
+
+        this.entityData.set(DATA_FLAGS_ID, b0);
+    }
+
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
@@ -62,8 +111,8 @@ public class WormEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(6);
+    protected PathNavigation createNavigation(Level level) {
+        return new WallClimberNavigation(this, level);
     }
 
     @Override
@@ -79,7 +128,7 @@ public class WormEntity extends PathfinderMob implements GeoEntity {
         }
         if (this.deathTime >= 30 && !isRemoved() && !level().isClientSide) {
             this.level().broadcastEntityEvent(this, EntityEvent.POOF);
-            this.remove(Entity.RemovalReason.KILLED);
+            this.remove(RemovalReason.KILLED);
         }
     }
 
