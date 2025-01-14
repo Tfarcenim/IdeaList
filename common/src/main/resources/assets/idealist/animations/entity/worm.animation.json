@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"idle": {
+		"misc.idle": {
 			"loop": true,
 			"animation_length": 9.7083,
 			"override_previous_animation": true,
@@ -1998,7 +1998,7 @@
 				}
 			}
 		},
-		"walk": {
+		"move.walk": {
 			"loop": true,
 			"animation_length": 4.4167,
 			"override_previous_animation": true,
@@ -4126,7 +4126,7 @@
 				}
 			}
 		},
-		"attack": {
+		"attack.bite": {
 			"animation_length": 1.375,
 			"bones": {
 				"bone34": {
@@ -4743,7 +4743,7 @@
 				}
 			}
 		},
-		"funny": {
+		"misc.funny": {
 			"loop": true,
 			"animation_length": 10.1667,
 			"bones": {
@@ -4799,7 +4799,7 @@
 				}
 			}
 		},
-		"death": {
+		"misc.die": {
 			"animation_length": 1.875,
 			"bones": {
 				"bone": {

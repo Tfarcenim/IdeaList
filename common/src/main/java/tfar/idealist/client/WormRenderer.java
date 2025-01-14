@@ -9,4 +9,9 @@ public class WormRenderer extends GeoEntityRenderer<WormEntity> {
     public WormRenderer(EntityRendererProvider.Context renderManager, GeoModel<WormEntity> model) {
         super(renderManager, model);
     }
+
+    @Override
+    protected float getDeathMaxRotation(WormEntity animatable) {
+        return 0;
+    }
 }
