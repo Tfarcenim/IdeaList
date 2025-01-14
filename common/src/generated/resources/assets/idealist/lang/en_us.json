@@ -10,6 +10,7 @@
   "death.attack.rose": "%1$s was pricked to death",
   "death.attack.rose.player": "%1$s walked into a rose bush while trying to escape %2$s",
   "entity.idealist.ant": "Ant",
+  "entity.idealist.sparrow": "Sparrow",
   "entity.idealist.worm": "Worm",
   "event.idealist.seed_raid": "Seed Raid",
   "event.idealist.seed_raid.victory.full": "Seed Raid - Victory",

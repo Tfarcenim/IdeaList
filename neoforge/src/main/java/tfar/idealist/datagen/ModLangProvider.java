@@ -52,7 +52,7 @@ public class ModLangProvider extends LanguageProvider {
         addTextComponent(SeedRaidData.SEED_RAID_BAR_DEFEAT_COMPONENT,"Seed Raid - Loss");
 
         addDefaultEntityType(() -> ModEntityTypes.WORM);
-        //addDefaultEntityType(() -> ModEntityTypes.WORM);
+        addDefaultEntityType(() -> ModEntityTypes.SPARROW);
         addDefaultEntityType(() -> ModEntityTypes.ANT);
     }
 

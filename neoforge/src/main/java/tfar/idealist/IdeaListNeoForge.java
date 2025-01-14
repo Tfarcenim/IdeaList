@@ -52,6 +52,7 @@ import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
 import tfar.idealist.entity.AnimatedBlockEntity;
 import tfar.idealist.entity.AntEntity;
+import tfar.idealist.entity.SparrowEntity;
 import tfar.idealist.entity.WormEntity;
 import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.init.ModEntityTypes;
@@ -177,6 +178,7 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.ANIMATED_BLOCK, AnimatedBlockEntity.create().build());
         event.put(ModEntityTypes.WORM, WormEntity.attributes().build());
         event.put(ModEntityTypes.ANT, AntEntity.attributes().build());
+        event.put(ModEntityTypes.SPARROW, SparrowEntity.attributes().build());
     }
 
     //- When a player tries to kill a cow, the cow stops moving and looks at the player,

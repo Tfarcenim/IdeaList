@@ -16,6 +16,13 @@ import tfar.idealist.IdeaList;
 
 public class SeedRaidData extends SavedData {
 
+    //I will get you the growing seed model by Tuesday.
+    // Some more specifics on how the seed defense idea will work: The ants, worms, and birds will have the same health and damage as zombies and spawn in 4 waves.
+    // Each wave their health will increase by 1.5 hearts.
+    // Ants and worms movement speed will also slightly increase every wave so that in the 4th wave their movement speed will be 2x the standard speed.
+    // In order for the seed to grow to the next phase, the players must kill all the ants, birds, and worms for that specific wave.
+    // The seed will be able to take 10 hits before it breaks (please add a comment for this part so that we can change it later on if needed).
+
     private final ServerBossEvent raidEvent = new ServerBossEvent(SEED_RAID_NAME_COMPONENT, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
     public static final MutableComponent SEED_RAID_NAME_COMPONENT = Component.translatable("event.idealist.seed_raid");
     public static final MutableComponent SEED_RAID_BAR_VICTORY_COMPONENT = Component.translatable("event.idealist.seed_raid.victory.full");

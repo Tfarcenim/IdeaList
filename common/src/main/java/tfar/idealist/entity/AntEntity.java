@@ -63,7 +63,7 @@ public class AntEntity extends PathfinderMob implements GeoEntity {
                 .add(Attributes.ATTACK_DAMAGE,3)
                 .add(Attributes.MAX_HEALTH,20)
                 .add(Attributes.MOVEMENT_SPEED, 0.3F)
-                .add(Attributes.FOLLOW_RANGE, 16);
+                .add(Attributes.FOLLOW_RANGE, 96);
     }
 
     @Override
