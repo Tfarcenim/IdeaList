@@ -2,7 +2,6 @@ package tfar.idealist.datagen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -19,6 +18,7 @@ import org.codehaus.plexus.util.StringUtils;
 import tfar.idealist.IdeaList;
 import tfar.idealist.TextComponents;
 import tfar.idealist.init.ModItems;
+import tfar.idealist.world.SeedRaidData;
 
 import java.util.function.Supplier;
 
@@ -45,6 +45,10 @@ public class ModLangProvider extends LanguageProvider {
 
         addTextComponent(TextComponents.PLANT_WHEAT,"Green Thumb");
         addTextComponent(TextComponents.PLANT_WHEAT_DESC,"Plant wheat seeds on farmland");
+
+         addTextComponent(SeedRaidData.SEED_RAID_NAME_COMPONENT,"Seed Raid");
+        addTextComponent(SeedRaidData.SEED_RAID_BAR_VICTORY_COMPONENT,"Seed Raid - Victory");
+        addTextComponent(SeedRaidData.SEED_RAID_BAR_DEFEAT_COMPONENT,"Seed Raid - Loss");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

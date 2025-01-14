@@ -29,7 +29,7 @@ public class ModDataPackProvider extends DatapackBuiltinEntriesProvider {
     public static void dimensionType(BootstrapContext<DimensionType> context) {
         context.register(IdeaList.SEED_DIM_TYPE,
                 new DimensionType(
-                        OptionalLong.of(18000L),
+                        OptionalLong.of(6000L),
                         true,
                         false,
                         false,

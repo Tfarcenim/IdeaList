@@ -1,6 +1,7 @@
 package tfar.idealist;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -49,6 +50,8 @@ public class IdeaConfig {
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_6;
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_7;
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_8;
+
+        public static ConfigHelper.ConfigObject<Vec3> SEED_TELEPORT;
         public Server(ModConfigSpec.Builder builder) {
             builder.push("general");
             BINGO_ADVANCEMENT_0 = builder.define("bingo_advancement_0",Defaults.KILL_COW.toString());
@@ -60,6 +63,8 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_6 = builder.define("bingo_advancement_6", Defaults.SHOOT_A_TARGET.toString());
             BINGO_ADVANCEMENT_7 = builder.define("bingo_advancement_7", Defaults.COMPLETE_A_RAID.toString());
             BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
+
+            SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
             builder.pop();
         }
 

@@ -1,21 +1,17 @@
 package tfar.idealist.client;
 
-import net.minecraft.client.model.HumanoidArmorModel;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EndermanRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
+import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import tfar.idealist.IdeaList;
 import tfar.idealist.init.ModEntityTypes;
 
@@ -34,6 +30,7 @@ public class ModClientNeoForge {
 
     static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.ANIMATED_BLOCK,AnimatedBlockRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.WORM,context -> new WormRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("worm"))));
     }
 
 

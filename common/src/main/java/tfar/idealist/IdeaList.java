@@ -47,6 +47,7 @@ public class IdeaList {
     public static final String MOD_NAME = "IdeaList";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
     public static final ResourceKey<DimensionType> SEED_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,id("seed"));
+    public static final ResourceKey<Level> SEED_DIM = ResourceKey.create(Registries.DIMENSION,id("seed"));
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
     // write the majority of your code here and load it from your loader specific projects. This example has some

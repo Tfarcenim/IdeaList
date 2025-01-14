@@ -28,9 +28,9 @@ public class SlowPasteSavedData extends SavedData {
     }
 
     public static SlowPasteSavedData loadStatic(CompoundTag compoundTag, HolderLookup.Provider registries) {
-        SlowPasteSavedData SlowPasteSavedData = new SlowPasteSavedData();
-        SlowPasteSavedData.load(compoundTag,registries);
-        return SlowPasteSavedData;
+        SlowPasteSavedData slowPasteSavedData = new SlowPasteSavedData();
+        slowPasteSavedData.load(compoundTag,registries);
+        return slowPasteSavedData;
     }
 
     public static SlowPasteSavedData loadFromLevel(ServerLevel level) {

@@ -9,6 +9,9 @@
   "advancements.idealist.plant_wheat.title": "Green Thumb",
   "death.attack.rose": "%1$s was pricked to death",
   "death.attack.rose.player": "%1$s walked into a rose bush while trying to escape %2$s",
+  "event.idealist.seed_raid": "Seed Raid",
+  "event.idealist.seed_raid.victory.full": "Seed Raid - Victory",
+  "event.minecraft.seed_raid.defeat.full": "Seed Raid - Loss",
   "item.idealist.bingo_card": "Bingo Card",
   "sleep.too_big": "Too big to sleep in this bed"
 }
