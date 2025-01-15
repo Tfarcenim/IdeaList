@@ -169,13 +169,7 @@ public class BingoAdvancements implements AdvancementProvider.AdvancementGenerat
 
         AdvancementHolder advancementholder7 = Advancement.Builder.advancement()
                 .parent(root)
-                .addCriterion(
-                        "plant_wheat_seeds",
-                        ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
-                                LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.FARMLAND)),
-                                ItemPredicate.Builder.item().of(Items.WHEAT_SEEDS)
-                        )
-                )
+                .addCriterion("destroy_wheat",CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()))
                 .display(
                         Items.WHEAT,
                         TextComponents.PLANT_WHEAT,

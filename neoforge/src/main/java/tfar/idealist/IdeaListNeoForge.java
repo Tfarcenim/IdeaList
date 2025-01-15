@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
@@ -44,6 +46,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
+import net.neoforged.neoforge.event.level.block.CropGrowEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -60,6 +63,7 @@ import tfar.idealist.network.PacketHandler;
 import tfar.idealist.network.S2CAttachmentDataPacket;
 import tfar.idealist.platform.PacketHandlerNeoForge;
 import tfar.idealist.platform.Services;
+import tfar.idealist.world.ModSavedData;
 import tfar.idealist.world.SeedRaidData;
 
 import java.util.*;
@@ -144,6 +148,7 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::pickup);
         NeoForge.EVENT_BUS.addListener(this::plantSeed);
         NeoForge.EVENT_BUS.addListener(this::levelTick);
+        NeoForge.EVENT_BUS.addListener(this::onGrow);
     }
 
     void spawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -241,6 +246,22 @@ public class IdeaListNeoForge {
             AnimatedBlockEntity run = AnimatedBlockEntity.run(player.level(), pos, state);
             run.hurt(player.damageSources().mobAttack(player),0);
         }
+
+        if (!player.level().isClientSide &&state.is(Blocks.WHEAT) && state.getValue(CropBlock.AGE) ==7) {
+            AdvancementHolder advancement = player.getServer().getAdvancements().get(IdeaConfig.Defaults.GROW_WHEAT);
+            if (advancement != null) {
+                AdvancementCommands.Action.GRANT.perform((ServerPlayer) player,List.of(advancement));
+            }
+        }
+    }
+
+    void onGrow(CropGrowEvent.Pre event) {
+        Level level = (Level) event.getLevel();
+        BlockPos pos = event.getPos();
+        ModSavedData modSavedData = ModSavedData.get((ServerLevel) level);
+        if (modSavedData != null && modSavedData.growthBlocked(pos)) {
+            event.setResult(CropGrowEvent.Pre.Result.DO_NOT_GROW);
+        }
     }
 
     void plantSeed(PlayerInteractEvent.RightClickBlock event) {
@@ -250,23 +271,18 @@ public class IdeaListNeoForge {
         BlockState state = player.level().getBlockState(pos);
         if (Services.PLATFORM.getData(player).twist()) {
             if (stack.is(Items.WHEAT_SEEDS) && state.is(Blocks.FARMLAND)) {
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
+               // event.setCancellationResult(InteractionResult.FAIL);
+               // event.setCanceled(true);
                 if (!player.level().isClientSide) {
-                    ServerLevel newLevel = player.getServer().getLevel(IdeaList.SEED_DIM);
-                    player.changeDimension(new DimensionTransition(newLevel,IdeaConfig.Server.SEED_TELEPORT.get(),Vec3.ZERO,player.getXRot(),player.getYRot(),false,SEED_ENTER_TRANSITION));
+                    player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).setReturnPos(player.position()).setSeedPos(pos));
+                    ModSavedData.getOrLoad((ServerLevel) player.level()).addPos(pos);
+                    ModEntityTypes.VACUUM.spawn((ServerLevel) player.level(),pos, MobSpawnType.EVENT);
                 }
             }
         }
     }
 
-    public static final DimensionTransition.PostDimensionTransition SEED_ENTER_TRANSITION = entity -> {
-        Level level = entity.level();
-        if (level.dimension() == IdeaList.SEED_DIM && entity instanceof ServerPlayer player) {
-            SeedRaidData seedRaidData = SeedRaidData.getOrLoad((ServerLevel) level);
-            seedRaidData.start(player);
-        }
-    };
+
 
     void levelTick(LevelTickEvent.Pre event) {
         Level level = event.getLevel();

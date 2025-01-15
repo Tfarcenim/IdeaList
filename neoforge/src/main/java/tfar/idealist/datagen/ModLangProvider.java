@@ -54,6 +54,8 @@ public class ModLangProvider extends LanguageProvider {
         addDefaultEntityType(() -> ModEntityTypes.WORM);
         addDefaultEntityType(() -> ModEntityTypes.SPARROW);
         addDefaultEntityType(() -> ModEntityTypes.ANT);
+        addDefaultEntityType(() -> ModEntityTypes.SEED);
+        addDefaultEntityType(() -> ModEntityTypes.VACUUM);
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

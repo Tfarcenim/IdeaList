@@ -33,6 +33,7 @@ public class ModClientNeoForge {
         event.registerEntityRenderer(ModEntityTypes.WORM,context -> new WormRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("worm"))));
         event.registerEntityRenderer(ModEntityTypes.ANT,context -> new AntRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("ant"))));
         event.registerEntityRenderer(ModEntityTypes.SPARROW,context -> new SparrowRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("sparrow"))));
+        event.registerEntityRenderer(ModEntityTypes.VACUUM,context -> new VacuumRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("vacuum"))));
 
     }
 

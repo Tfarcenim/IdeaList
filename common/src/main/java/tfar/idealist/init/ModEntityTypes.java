@@ -15,4 +15,7 @@ public class ModEntityTypes {
             .sized(1,5f)
             .clientTrackingRange(8).build("");
 
+    public static final EntityType<VacuumEntity> VACUUM = EntityType.Builder.of(VacuumEntity::new,MobCategory.MISC)
+            .sized(1,1).build("");
+
 }
