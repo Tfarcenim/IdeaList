@@ -1,8 +1,8 @@
-// 1.21.1	2025-01-13T18:39:44.9675853	Advancements
+// 1.21.1	2025-01-14T19:22:50.1585455	Advancements
 99ec3418cd20e7a7ec249445933d00bceddc9786 data/idealist/advancement/brush_sand.json
 7531fa2d8174b1e2e9d2b902a19163457d892ead data/idealist/advancement/complete_a_raid.json
 0c7a729980af274347abf7963def9f4eab920b1a data/idealist/advancement/enter_the_end.json
-781adae9da38d6dba55addc904185bd50d9f29a2 data/idealist/advancement/grow_wheat.json
+de05ecd2e2b7651310160c6978ab3d288bb81a53 data/idealist/advancement/grow_wheat.json
 75d9ceb1544255026ca7d555b05b2fdc99e7a5ab data/idealist/advancement/kill_cow.json
 58b839999d3f4ccd8c50048bbf49272c612ac50b data/idealist/advancement/kill_player.json
 0b5ef40619b4f64558605b5f592ff2b2fbda2b00 data/idealist/advancement/mine_diamond.json

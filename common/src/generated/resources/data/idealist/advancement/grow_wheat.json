@@ -1,26 +1,8 @@
 {
   "parent": "idealist:root",
   "criteria": {
-    "plant_wheat_seeds": {
-      "conditions": {
-        "location": [
-          {
-            "condition": "minecraft:location_check",
-            "predicate": {
-              "block": {
-                "blocks": "minecraft:farmland"
-              }
-            }
-          },
-          {
-            "condition": "minecraft:match_tool",
-            "predicate": {
-              "items": "minecraft:wheat_seeds"
-            }
-          }
-        ]
-      },
-      "trigger": "minecraft:item_used_on_block"
+    "destroy_wheat": {
+      "trigger": "minecraft:impossible"
     }
   },
   "display": {
@@ -37,7 +19,7 @@
   },
   "requirements": [
     [
-      "plant_wheat_seeds"
+      "destroy_wheat"
     ]
   ],
   "sends_telemetry_event": true

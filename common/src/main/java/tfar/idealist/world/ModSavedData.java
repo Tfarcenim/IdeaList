@@ -13,9 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import tfar.idealist.IdeaList;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ModSavedData extends SavedData {
 

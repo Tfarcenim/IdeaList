@@ -274,9 +274,9 @@ public class IdeaListNeoForge {
                // event.setCancellationResult(InteractionResult.FAIL);
                // event.setCanceled(true);
                 if (!player.level().isClientSide) {
-                    player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).setReturnPos(player.position()).setSeedPos(pos));
+                    player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).setReturnPos(player.position()).setSeedPos(pos.above()));
                     ModSavedData.getOrLoad((ServerLevel) player.level()).addPos(pos);
-                    ModEntityTypes.VACUUM.spawn((ServerLevel) player.level(),pos, MobSpawnType.EVENT);
+                    ModEntityTypes.VACUUM.spawn((ServerLevel) player.level(),pos.above(), MobSpawnType.EVENT);
                 }
             }
         }

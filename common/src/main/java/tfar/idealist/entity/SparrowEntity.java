@@ -30,6 +30,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.constant.DefaultAnimations;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import tfar.idealist.world.SeedRaidData;
 
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -120,7 +121,7 @@ public class SparrowEntity extends FlyingMob implements GeoEntity {
     }
 
     class PhantomAttackPlayerTargetGoal extends Goal {
-        private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(64.0);
+        private final TargetingConditions attackTargeting = TargetingConditions.forCombat().range(96);
         private int nextScanTick = reducedTickDelay(20);
 
         @Override
@@ -131,7 +132,7 @@ public class SparrowEntity extends FlyingMob implements GeoEntity {
             } else {
                 this.nextScanTick = reducedTickDelay(60);
                 List<Player> list = SparrowEntity.this.level()
-                        .getNearbyPlayers(this.attackTargeting, SparrowEntity.this, SparrowEntity.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
+                        .getNearbyPlayers(this.attackTargeting, SparrowEntity.this, SparrowEntity.this.getBoundingBox().inflate(96.0, 64.0, 96.0));
                 if (!list.isEmpty()) {
                     list.sort(Comparator.<Player, Double>comparing(Entity::getY).reversed());
 
@@ -172,8 +173,7 @@ public class SparrowEntity extends FlyingMob implements GeoEntity {
 
         @Override
         public void stop() {
-            SparrowEntity.this.anchorPoint = SparrowEntity.this.level()
-                    .getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, SparrowEntity.this.anchorPoint)
+            SparrowEntity.this.anchorPoint = SeedRaidData.getHeightIgnoringBarriersAndLight(level(),anchorPoint)
                     .above(10 + SparrowEntity.this.random.nextInt(20));
         }
 

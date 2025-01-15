@@ -2,6 +2,7 @@ package tfar.idealist.world;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -12,18 +13,24 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import tfar.idealist.IdeaConfig;
 import tfar.idealist.IdeaList;
 import tfar.idealist.PlayerBingoData;
+import tfar.idealist.entity.SparrowEntity;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.platform.Services;
 
@@ -46,7 +53,7 @@ public class SeedRaidData extends SavedData {
     private int tick;
     public static final int TIME = 20 * 60;
     int activeWave;
-    List<LivingEntity> waveEntities = new ArrayList<>();
+    List<Mob> waveEntities = new ArrayList<>();
 
     final List<Wave> waves = new ArrayList<>();
     boolean active;
@@ -83,6 +90,8 @@ public class SeedRaidData extends SavedData {
                 } else {
                     spawnNextWave();
                 }
+            } else {
+                waveEntities.removeIf(living -> living.isRemoved());
             }
         }
     }
@@ -109,7 +118,9 @@ public class SeedRaidData extends SavedData {
     public void start(ServerPlayer player) {
         cause = player;
         active = true;
+        activeWave = 0;
         //raidEvent.addPlayer(player);
+        waves.clear();
         waves.add(Wave.WAVE_1);
         spawnNextWave();
     }
@@ -117,7 +128,48 @@ public class SeedRaidData extends SavedData {
     void spawnNextWave() {
         activeWave++;
         Wave wave = waves.get(activeWave-1);
+        for (Object2IntMap.Entry<EntityType<? extends Mob>> entry :  wave.mobs().object2IntEntrySet()) {
+            int count = entry.getIntValue();
+            for (int i = 0; i < count;i++) {
+                Mob entity = entry.getKey().spawn(level,randomPos(), MobSpawnType.EVENT);
+                if (entity != null) {
+                    entity.setPersistenceRequired();
+                    entity.setTarget(cause);
+                    entity.addEffect(new MobEffectInstance(MobEffects.GLOWING,MobEffectInstance.INFINITE_DURATION));
+                    if (entity instanceof SparrowEntity sparrowEntity) {
+                        sparrowEntity.setAnchorPoint(cause.blockPosition().above(10));
+                    }
 
+                    waveEntities.add(entity);
+                }
+            }
+        }
+    }
+
+    BlockPos randomPos() {
+        Vec3 center = IdeaConfig.Server.SEED_TELEPORT.get();
+        float angleX = level.getRandom().nextFloat() * 360;
+        float x = Mth.sin((float) (Math.PI / 180 * angleX));
+        float z = Mth.cos((float) (Math.PI / 180 *angleX));
+
+        Vec3 pos = new Vec3(center.x + x * 64,center.y,center.z + z * 64);
+        BlockPos containing = BlockPos.containing(pos);
+        return getHeightIgnoringBarriersAndLight(level,containing.above(10)).above();
+    }
+
+    public static BlockPos getHeightIgnoringBarriersAndLight(Level level,BlockPos pos) {
+        BlockPos containing = pos;
+
+        int y =containing.getY();
+        while (y > level.getMinBuildHeight()) {
+            containing = new BlockPos(containing.getX(),y,containing.getZ());
+            BlockState state = level.getBlockState(containing);
+            if (!state.isAir() && !state.is(Blocks.BARRIER) && !state.is(Blocks.LIGHT)) {
+                break;
+            }
+            y--;
+        }
+        return containing;
     }
 
     @Nullable
@@ -135,12 +187,12 @@ public class SeedRaidData extends SavedData {
         return IdeaList.MOD_ID +"_"+level.dimension().location().getPath()+"_seed_raid";
     }
 
-    record Wave(Object2IntMap<EntityType<? extends LivingEntity>> mobs) {
+    record Wave(Object2IntMap<EntityType<? extends Mob>> mobs) {
         public static final Wave WAVE_1 = makeWave();
     }
 
     static Wave makeWave() {
-        Object2IntMap<EntityType<? extends LivingEntity>> mobs = new Object2IntOpenHashMap<>(3);
+        Object2IntMap<EntityType<? extends Mob>> mobs = new Object2IntOpenHashMap<>(3);
         mobs.put(ModEntityTypes.ANT,4);
         mobs.put(ModEntityTypes.WORM,4);
         mobs.put(ModEntityTypes.SPARROW,4);
