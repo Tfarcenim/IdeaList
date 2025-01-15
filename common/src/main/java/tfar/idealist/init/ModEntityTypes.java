@@ -2,6 +2,7 @@ package tfar.idealist.init;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.PathfinderMob;
 import tfar.idealist.entity.*;
 
 public class ModEntityTypes {
@@ -23,7 +24,7 @@ public class ModEntityTypes {
             .clientTrackingRange(8)
             .build("");
 
-    public static final EntityType<TRexSkeletonEntity> MECH = EntityType.Builder.of(TRexSkeletonEntity::new,MobCategory.MONSTER)
+    public static final EntityType<CowMechEntity> COW_MECH = EntityType.Builder.of(CowMechEntity::new,MobCategory.MONSTER)
             .sized(3.5f,2.5f)
             .clientTrackingRange(8)
             .build("");

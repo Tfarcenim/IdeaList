@@ -84,6 +84,8 @@ public class IdeaList {
                 cir.setReturnValue(InteractionResult.CONSUME);//don't construct the portal yet
                 EnderMan enderMan = EntityType.ENDERMAN.spawn((ServerLevel) level, player.blockPosition().south(5), MobSpawnType.EVENT);
                 enderMan.setInvulnerable(true);
+                enderMan.setNoAi(true);
+                enderMan.setAggressive(false);
                 enderMan.setItemSlot(EquipmentSlot.HEAD,ModItems.PURPLE_GLASSES.getDefaultInstance());
                 Services.PLATFORM.setData(player,Services.PLATFORM.getData(player).incrementQuestion().setDeferredEndPortalPos(match.getFrontTopLeft()));
                 askQuestion(player);

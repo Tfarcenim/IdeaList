@@ -8,7 +8,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.UUID;
+
 public record PlayerBingoData(boolean twist, int shot_count, Vec3 return_pos, BlockPos seed_pos,BlockPos deferred_end_portal,int question) {
+
+    public record QuizData(BlockPos deferred_portal, int question, UUID enderman) {
+        
+    }
 
     public static final Codec<PlayerBingoData> CODEC = RecordCodecBuilder.create(playerBingoDataInstance ->
             playerBingoDataInstance.group(

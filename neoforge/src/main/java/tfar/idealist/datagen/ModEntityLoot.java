@@ -22,6 +22,7 @@ public class ModEntityLoot extends VanillaEntityLoot {
         nothing(ModEntityTypes.SPARROW);
         nothing(ModEntityTypes.TREX_SKELETON);
         nothing(ModEntityTypes.WORM);
+        nothing(ModEntityTypes.COW_MECH);
     }
 
     protected void nothing(EntityType<?> type) {
