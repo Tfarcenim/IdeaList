@@ -189,6 +189,9 @@ public class SeedRaidData extends SavedData {
 
     record Wave(Object2IntMap<EntityType<? extends Mob>> mobs) {
         public static final Wave WAVE_1 = makeWave();
+        public static final Wave WAVE_2 = makeWave();
+        public static final Wave WAVE_3 = makeWave();
+        public static final Wave WAVE_4 = makeWave();
     }
 
     static Wave makeWave() {

@@ -53,10 +53,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
-import tfar.idealist.entity.AnimatedBlockEntity;
-import tfar.idealist.entity.AntEntity;
-import tfar.idealist.entity.SparrowEntity;
-import tfar.idealist.entity.WormEntity;
+import tfar.idealist.entity.*;
 import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.network.PacketHandler;
@@ -184,6 +181,7 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.WORM, WormEntity.attributes().build());
         event.put(ModEntityTypes.ANT, AntEntity.attributes().build());
         event.put(ModEntityTypes.SPARROW, SparrowEntity.attributes().build());
+        event.put(ModEntityTypes.TREX_SKELETON, TRexSkeletonEntity.attributes().build());
     }
 
     //- When a player tries to kill a cow, the cow stops moving and looks at the player,

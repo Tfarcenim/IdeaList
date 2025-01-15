@@ -3,6 +3,7 @@ package tfar.idealist;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -40,6 +41,7 @@ import tfar.idealist.platform.Services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -68,7 +70,7 @@ public class IdeaList {
             AdvancementCommands.Action.GRANT.perform(player, List.of(advancement));
         }
         if (Services.PLATFORM.getData(player).twist()) {
-            EntityType.WARDEN.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
+            ModEntityTypes.TREX_SKELETON.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
         }
     }
 
@@ -156,6 +158,10 @@ public class IdeaList {
     @SuppressWarnings("unchecked")
     static <T> Class<T> cast(Class<?> clazz) {
         return (Class<T>) clazz;
+    }
+
+    public static <V> Stream<V> getKnown(Registry<V> registry) {
+        return registry.stream().filter(o -> registry.getKey(o).getNamespace().equals(MOD_ID));
     }
 
     public static ResourceLocation id(String key) {

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.MobCategory;
 import tfar.idealist.entity.*;
 
 public class ModEntityTypes {
-    public static final EntityType<AnimatedBlockEntity> ANIMATED_BLOCK = EntityType.Builder.of(AnimatedBlockEntity::new, MobCategory.MISC).sized(1,1).build("");
+    public static final EntityType<AnimatedBlockEntity> ANIMATED_BLOCK = EntityType.Builder.of(AnimatedBlockEntity::new, MobCategory.CREATURE).sized(1,1).build("");
     public static final EntityType<WormEntity> WORM = EntityType.Builder.of(WormEntity::new,MobCategory.MONSTER)
             .sized(.9375f,.625f)
             .clientTrackingRange(8).build("");
@@ -17,5 +17,10 @@ public class ModEntityTypes {
 
     public static final EntityType<VacuumEntity> VACUUM = EntityType.Builder.of(VacuumEntity::new,MobCategory.MISC)
             .sized(1,1).build("");
+
+    public static final EntityType<TRexSkeletonEntity> TREX_SKELETON = EntityType.Builder.of(TRexSkeletonEntity::new,MobCategory.MONSTER)
+            .sized(3.5f,2.5f)
+            .clientTrackingRange(8)
+            .build("");
 
 }
