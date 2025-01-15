@@ -1,9 +1,8 @@
-package tfar.idealist.datagen;
+package tfar.idealist.datagen.data;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 
 import java.util.concurrent.CompletableFuture;

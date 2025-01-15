@@ -4,12 +4,17 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import tfar.idealist.IdeaList;
+import tfar.idealist.datagen.data.ModBlockTagsProvider;
+import tfar.idealist.datagen.data.ModDamageTypeTagsProvider;
+import tfar.idealist.datagen.data.ModEntityTypeTagsProvider;
+import tfar.idealist.datagen.data.ModItemTagsProvider;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -24,6 +29,8 @@ public class ModDatagen {
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         generator.addProvider(true,new ModLangProvider(output));
         generator.addProvider(true,new ModDamageTypeTagsProvider(output,lookupProvider,existingFileHelper));
+        generator.addProvider(true,new ModEntityTypeTagsProvider(output,lookupProvider,existingFileHelper));
+
         BlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(output,lookupProvider,existingFileHelper);
         generator.addProvider(true,blockTagsProvider);
         generator.addProvider(true,new ModItemTagsProvider(output,lookupProvider,blockTagsProvider.contentsGetter()));

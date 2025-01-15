@@ -1,4 +1,4 @@
-package tfar.idealist.datagen;
+package tfar.idealist.datagen.data;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

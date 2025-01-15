@@ -23,4 +23,9 @@ public class ModEntityTypes {
             .clientTrackingRange(8)
             .build("");
 
+    public static final EntityType<TRexSkeletonEntity> MECH = EntityType.Builder.of(TRexSkeletonEntity::new,MobCategory.MONSTER)
+            .sized(3.5f,2.5f)
+            .clientTrackingRange(8)
+            .build("");
+
 }

@@ -3,6 +3,7 @@ package tfar.idealist;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashSet;
@@ -37,6 +38,21 @@ public class IdeaConfig {
         public static final ResourceLocation SHOOT_A_TARGET = IdeaList.id("shoot_a_target");
         public static final ResourceLocation COMPLETE_A_RAID = IdeaList.id("complete_a_raid");
         public static final ResourceLocation GROW_WHEAT = IdeaList.id("grow_wheat");
+
+        public static final QandA Q0 = new QandA("What color is a Minecraft pig?", Sets.newHashSet("pink"));
+
+
+
+        public static final QandA Q1 = new QandA("Which mineral can generate naturally in both the Overworld and the Nether?",
+                Sets.newHashSet("gold","au"));
+
+        public static final QandA Q2 = new QandA("Which of these mobs has the most health points?",Sets.newHashSet("warden"));
+
+
+        public static final QandA Q3 = new QandA("How many music discs are in the game?",Sets.newHashSet("fifteen","15"));
+
+        public static final QandA Q4 = new QandA("What is Walter white’s age in season 3 of breaking bad?",Sets.newHashSet("fifty","50"));
+
     }
 
     public static class Server {
@@ -50,6 +66,12 @@ public class IdeaConfig {
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_6;
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_7;
         public static ModConfigSpec.ConfigValue<String> BINGO_ADVANCEMENT_8;
+
+        public static ConfigHelper.ConfigObject<QandA> QUESTION_0;
+        public static ConfigHelper.ConfigObject<QandA> QUESTION_1;
+        public static ConfigHelper.ConfigObject<QandA> QUESTION_2;
+        public static ConfigHelper.ConfigObject<QandA> QUESTION_3;
+        public static ConfigHelper.ConfigObject<QandA> QUESTION_4;
 
         public static ConfigHelper.ConfigObject<Vec3> SEED_TELEPORT;
         public Server(ModConfigSpec.Builder builder) {
@@ -65,6 +87,12 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
 
             SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
+
+            QUESTION_0 = ConfigHelper.defineObject(builder,"question_0",QandA.CODEC,Defaults.Q0);
+            QUESTION_1 = ConfigHelper.defineObject(builder,"question_1",QandA.CODEC,Defaults.Q1);
+            QUESTION_2 = ConfigHelper.defineObject(builder,"question_2",QandA.CODEC,Defaults.Q2);
+            QUESTION_3 = ConfigHelper.defineObject(builder,"question_3",QandA.CODEC,Defaults.Q3);
+            QUESTION_4 = ConfigHelper.defineObject(builder,"question_4",QandA.CODEC,Defaults.Q4);
             builder.pop();
         }
 

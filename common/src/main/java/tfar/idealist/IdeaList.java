@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -29,6 +30,8 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -74,16 +77,48 @@ public class IdeaList {
         }
     }
 
-    public static void onEndPortalCompleted(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
-        Player player = context.getPlayer();
+    public static void onEndPortalCompleted(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, BlockPattern.BlockPatternMatch match) {
+        ServerPlayer player = (ServerPlayer) context.getPlayer();
         if (Services.PLATFORM.getData(player).twist()) {
             Level level = context.getLevel();
-            if (player != null) {
                 cir.setReturnValue(InteractionResult.CONSUME);//don't construct the portal yet
-                EnderMan enderMan = EntityType.ENDERMAN.spawn((ServerLevel) level, player.blockPosition(), MobSpawnType.EVENT);
+                EnderMan enderMan = EntityType.ENDERMAN.spawn((ServerLevel) level, player.blockPosition().south(5), MobSpawnType.EVENT);
+                enderMan.setInvulnerable(true);
                 enderMan.setItemSlot(EquipmentSlot.HEAD,ModItems.PURPLE_GLASSES.getDefaultInstance());
-            }
+                Services.PLATFORM.setData(player,Services.PLATFORM.getData(player).incrementQuestion().setDeferredEndPortalPos(match.getFrontTopLeft()));
+                askQuestion(player);
         }
+    }
+
+    public static void askQuestion(ServerPlayer player) {
+        int question = Services.PLATFORM.getData(player).question();
+        QandA qandA = getQuestion(question);
+        player.displayClientMessage(Component.literal(qandA.question()),false);
+
+    }
+
+    public static void spawnPortal(ServerLevel level,BlockPos pos) {
+            BlockPos blockpos1 = pos.offset(-3, 0, -3);
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    level.setBlock(blockpos1.offset(i, 0, j), Blocks.END_PORTAL.defaultBlockState(), 2);
+                }
+            }
+
+            level.globalLevelEvent(1038, blockpos1.offset(1, 0, 1), 0);
+        }
+
+    public static QandA getQuestion(int i) {
+        return switch (i){
+            case 0->IdeaConfig.Server.QUESTION_0.get();
+            case 1->IdeaConfig.Server.QUESTION_1.get();
+            case 2->IdeaConfig.Server.QUESTION_2.get();
+            case 3->IdeaConfig.Server.QUESTION_3.get();
+            case 4->IdeaConfig.Server.QUESTION_4.get();
+            default->
+                    throw new IllegalStateException("Unexpected value: " + i);
+        };
     }
 
     public static float modifyInaccuracy(float original, LivingEntity entity) {

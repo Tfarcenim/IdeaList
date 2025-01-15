@@ -6,6 +6,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.AdvancementCommands;
@@ -43,6 +44,7 @@ import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
@@ -146,6 +148,7 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::plantSeed);
         NeoForge.EVENT_BUS.addListener(this::levelTick);
         NeoForge.EVENT_BUS.addListener(this::onGrow);
+        NeoForge.EVENT_BUS.addListener(this::answerQuestion);
     }
 
     void spawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -289,6 +292,28 @@ public class IdeaListNeoForge {
             if (seedRaidData != null) {
                 seedRaidData.tick();
             }
+        }
+    }
+
+    void answerQuestion(ServerChatEvent event) {
+        String rawText = event.getRawText();
+        ServerPlayer player = event.getPlayer();
+        int question = Services.PLATFORM.getData(player).question();
+        if (question > -1) {
+            QandA qanda = IdeaList.getQuestion(question);
+            if (qanda.acceptable_answers().contains(rawText.toLowerCase(Locale.ROOT))) {
+                PlayerBingoData data = Services.PLATFORM.getData(player);
+                if (question < 4) {
+                    Services.PLATFORM.setData(player,data.incrementQuestion());
+                    IdeaList.askQuestion(player);
+                } else {
+                    IdeaList.spawnPortal(player.serverLevel(),data.deferred_end_portal());
+                    Services.PLATFORM.setData(player,data.resetQuestions());
+                }
+            } else {
+                player.displayClientMessage(Component.literal("Incorrect answer"),false);
+            }
+            event.setCanceled(true);
         }
     }
 }
