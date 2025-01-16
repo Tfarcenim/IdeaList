@@ -14,25 +14,34 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +66,7 @@ public class IdeaList {
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
     public static final ResourceKey<DimensionType> SEED_DIM_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,id("seed"));
     public static final ResourceKey<Level> SEED_DIM = ResourceKey.create(Registries.DIMENSION,id("seed"));
+    public static final ResourceKey<Level> PIGLIN_PARKOUR_DIM = ResourceKey.create(Registries.DIMENSION,id("piglin_parkour"));
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
     // write the majority of your code here and load it from your loader specific projects. This example has some
@@ -72,28 +82,30 @@ public class IdeaList {
         if (advancement != null) {
             AdvancementCommands.Action.GRANT.perform(player, List.of(advancement));
         }
-        if (Services.PLATFORM.getData(player).twist()) {
+        if (Services.PLATFORM.getPlayerData(player).twist()) {
             ModEntityTypes.TREX_SKELETON.spawn((ServerLevel) level, pos, MobSpawnType.EVENT);
         }
     }
 
     public static void onEndPortalCompleted(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir, BlockPattern.BlockPatternMatch match) {
         ServerPlayer player = (ServerPlayer) context.getPlayer();
-        if (Services.PLATFORM.getData(player).twist()) {
+        if (Services.PLATFORM.getPlayerData(player).twist()) {
             Level level = context.getLevel();
                 cir.setReturnValue(InteractionResult.CONSUME);//don't construct the portal yet
                 EnderMan enderMan = EntityType.ENDERMAN.spawn((ServerLevel) level, player.blockPosition().south(5), MobSpawnType.EVENT);
                 enderMan.setInvulnerable(true);
                 enderMan.setNoAi(true);
                 enderMan.setAggressive(false);
+                enderMan.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(
+                        new AttributeModifier(id("enderman_quiz"),100, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
                 enderMan.setItemSlot(EquipmentSlot.HEAD,ModItems.PURPLE_GLASSES.getDefaultInstance());
-                Services.PLATFORM.setData(player,Services.PLATFORM.getData(player).incrementQuestion().setDeferredEndPortalPos(match.getFrontTopLeft()));
+                Services.PLATFORM.setPlayerData(player,Services.PLATFORM.getPlayerData(player).incrementQuestion().setDeferredEndPortalPos(match.getFrontTopLeft()).setEnderman(enderMan.getUUID()));
                 askQuestion(player);
         }
     }
 
     public static void askQuestion(ServerPlayer player) {
-        int question = Services.PLATFORM.getData(player).question();
+        int question = Services.PLATFORM.getPlayerData(player).quiz_data().question();
         QandA qandA = getQuestion(question);
         player.displayClientMessage(Component.literal(qandA.question()),false);
 
@@ -124,9 +136,9 @@ public class IdeaList {
     }
 
     public static float modifyInaccuracy(float original, LivingEntity entity) {
-        if (entity instanceof Player player && Services.PLATFORM.getData(player).twist()) {
-            Services.PLATFORM.setData(player,Services.PLATFORM.getData(player).incrementShot());
-            int shots = Services.PLATFORM.getData(player).shot_count();
+        if (entity instanceof Player player && Services.PLATFORM.getPlayerData(player).twist()) {
+            Services.PLATFORM.setPlayerData(player,Services.PLATFORM.getPlayerData(player).incrementShot());
+            int shots = Services.PLATFORM.getPlayerData(player).shot_count();
             if (shots %10 == 0) {
                 return original;
             }
@@ -186,6 +198,23 @@ public class IdeaList {
         raid.setDirty();
     }
 
+    public static void onPiglinGoldPickup(Piglin piglin, ItemEntity itemEntity, ItemStack stack) {
+        if (stack.is(Items.GOLD_INGOT)) {
+            Entity owner = itemEntity.getOwner();
+            if (owner instanceof Player player && Services.PLATFORM.getPlayerData(player).twist()) {
+                piglin.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(randomPosInCircle(piglin.blockPosition(),100), 2, 1));
+                Services.PLATFORM.setPiglinData(piglin,new ExtraPiglinData(owner.getUUID()));
+            }
+        }
+    }
+
+    static BlockPos randomPosInCircle(BlockPos pos,double r) {
+        float angle = (float) (Math.random() * 360);
+        float x = Mth.sin((float) (angle * Math.PI /180));
+        float z = Mth.cos((float) (angle * Math.PI /180));
+        return BlockPos.containing(pos.getX() + x * r,pos.getY(),pos.getZ() + z * r);
+    }
+
     public static final StreamCodec<ByteBuf, Vec3> VEC3_STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.DOUBLE, Vec3::x,
             ByteBufCodecs.DOUBLE, Vec3::y,
@@ -203,6 +232,38 @@ public class IdeaList {
 
     public static ResourceLocation id(String key) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID,key);
+    }
+
+    public static void finishTrade(Piglin piglin, boolean shouldBarter, CallbackInfo ci) {
+        ExtraPiglinData data = Services.PLATFORM.getPiglinData(piglin);
+        ServerPlayer player = piglin.getServer().getPlayerList().getPlayer(data.lastTraded());
+
+        if (piglin.level().dimension() == Level.NETHER) {
+            if (shouldBarter) {
+                if (player != null) {
+                    if (Services.PLATFORM.getPlayerData(player).twist()) {
+                        piglin.discard();
+                        Services.PLATFORM.setPlayerData(player,Services.PLATFORM.getPlayerData(player).setPiglinParkourReturnPos(player.position()));
+                        ServerLevel piglinParkour = player.server.getLevel(PIGLIN_PARKOUR_DIM);
+                        player.changeDimension(new DimensionTransition(piglinParkour, IdeaConfig.Server.PIGLIN_PARKOUR_PLAYER_TELEPORT.get(), Vec3.ZERO, player.getXRot(), player.getYRot(), entity -> {
+                            Piglin newPiglin = EntityType.PIGLIN.spawn(piglinParkour, BlockPos.containing(IdeaConfig.Server.PIGLIN_PARKOUR_PIGLIN_TELEPORT.get()), MobSpawnType.EVENT);
+                            piglin.setPersistenceRequired();
+
+                            ItemEntity item = new ItemEntity(piglinParkour, newPiglin.getX(), newPiglin.getY(), newPiglin.getZ(), Items.GOLD_INGOT.getDefaultInstance());
+                            piglinParkour.addFreshEntity(item);
+                            player.setGameMode(GameType.ADVENTURE);
+                        }));
+                    }
+                } else {
+                    //todo handle offline players
+                }
+                ci.cancel();
+            }
+        } else {
+            List<ItemStack> barterItems = PiglinAi.getBarterResponseItems(piglin);
+            PiglinAi.throwItemsTowardPos(piglin,barterItems,IdeaConfig.Server.PIGLIN_PARKOUR_PIGLIN_TELEPORT.get());
+            ci.cancel();
+        }
     }
 }
 

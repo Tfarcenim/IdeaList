@@ -90,7 +90,7 @@ public class ModClient {
     public static void handle(S2CAttachmentDataPacket s2CAttachmentDataPacket) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
-            Services.PLATFORM.setData(player,s2CAttachmentDataPacket.data());
+            Services.PLATFORM.setPlayerData(player,s2CAttachmentDataPacket.data());
         }
     }
 }

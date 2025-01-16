@@ -74,6 +74,9 @@ public class IdeaConfig {
         public static ConfigHelper.ConfigObject<QandA> QUESTION_4;
 
         public static ConfigHelper.ConfigObject<Vec3> SEED_TELEPORT;
+        public static ConfigHelper.ConfigObject<Vec3> PIGLIN_PARKOUR_PLAYER_TELEPORT;
+        public static ConfigHelper.ConfigObject<Vec3> PIGLIN_PARKOUR_PIGLIN_TELEPORT;
+
         public Server(ModConfigSpec.Builder builder) {
             builder.push("general");
             BINGO_ADVANCEMENT_0 = builder.define("bingo_advancement_0",Defaults.KILL_COW.toString());
@@ -87,6 +90,9 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
 
             SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
+
+            PIGLIN_PARKOUR_PLAYER_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_player_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
+            PIGLIN_PARKOUR_PIGLIN_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_piglin_teleport",Vec3.CODEC,new Vec3(47, 62, 1));
 
             QUESTION_0 = ConfigHelper.defineObject(builder,"question_0",QandA.CODEC,Defaults.Q0);
             QUESTION_1 = ConfigHelper.defineObject(builder,"question_1",QandA.CODEC,Defaults.Q1);

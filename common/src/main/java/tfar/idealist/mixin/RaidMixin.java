@@ -37,7 +37,7 @@ public class RaidMixin implements RaidDuck {
     @Inject(method = "spawnGroup",at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/raid/Raid;shouldSpawnBonusGroup()Z",shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD,cancellable = true)
     private void overrideSpawns(BlockPos pos, CallbackInfo ci, boolean flag, int i, DifficultyInstance difficultyinstance) {
-        if (causingPlayer != null && Services.PLATFORM.getData(causingPlayer).twist()) {
+        if (causingPlayer != null && Services.PLATFORM.getPlayerData(causingPlayer).twist()) {
             IdeaList.overrideRaidSpawns((Raid)(Object)this,pos, ci, flag, i, difficultyinstance);
             ci.cancel();
         }

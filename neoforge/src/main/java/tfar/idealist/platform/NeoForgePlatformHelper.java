@@ -7,9 +7,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.apache.commons.lang3.tuple.Pair;
+import tfar.idealist.ExtraPiglinData;
 import tfar.idealist.IdeaList;
 import tfar.idealist.IdeaListNeoForge;
 import tfar.idealist.PlayerBingoData;
@@ -82,12 +84,22 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void setData(Player player, PlayerBingoData data) {
+    public void setPlayerData(Player player, PlayerBingoData data) {
         player.setData(AttachmentTypes.PLAYER_BINGO_DATA,data);
     }
 
     @Override
-    public PlayerBingoData getData(Player player) {
+    public PlayerBingoData getPlayerData(Player player) {
         return player.getData(AttachmentTypes.PLAYER_BINGO_DATA);
+    }
+
+    @Override
+    public ExtraPiglinData getPiglinData(Piglin piglin) {
+        return piglin.getData(AttachmentTypes.EXTRA_PIGLIN_DATA);
+    }
+
+    @Override
+    public void setPiglinData(Piglin piglin, ExtraPiglinData extraPiglinData) {
+        piglin.setData(AttachmentTypes.EXTRA_PIGLIN_DATA,extraPiglinData);
     }
 }

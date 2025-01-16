@@ -2,7 +2,6 @@ package tfar.idealist.world;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
@@ -98,14 +96,14 @@ public class SeedRaidData extends SavedData {
 
     void end() {
         active = false;
-        PlayerBingoData data = Services.PLATFORM.getData(cause);
+        PlayerBingoData data = Services.PLATFORM.getPlayerData(cause);
         cause.changeDimension(new DimensionTransition(cause.server.overworld(),
-                data.return_pos(), Vec3.ZERO,cause.getXRot(),cause.getYRot(),false,SEED_LEAVE_TRANSITION_WIN));
+                data.seed_return_pos(), Vec3.ZERO,cause.getXRot(),cause.getYRot(),false,SEED_LEAVE_TRANSITION_WIN));
     }
 
     public static final DimensionTransition.PostDimensionTransition SEED_LEAVE_TRANSITION_WIN = entity -> {
         if (entity instanceof ServerPlayer player) {
-            PlayerBingoData data = Services.PLATFORM.getData(player);
+            PlayerBingoData data = Services.PLATFORM.getPlayerData(player);
             BlockPos pos = data.seed_pos();
             ModSavedData.getOrLoad(player.serverLevel()).removePos(pos);
             BlockState state = player.level().getBlockState(pos);

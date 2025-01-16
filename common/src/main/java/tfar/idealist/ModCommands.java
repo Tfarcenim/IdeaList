@@ -30,8 +30,8 @@ public class ModCommands {
         Collection<ServerPlayer> players = EntityArgument.getPlayers(context,"players");
 
         for (ServerPlayer player : players) {
-            PlayerBingoData playerBingoData = Services.PLATFORM.getData(player);
-            Services.PLATFORM.setAndSyncData(player,playerBingoData.withTwist(twist));
+            PlayerBingoData playerBingoData = Services.PLATFORM.getPlayerData(player);
+            Services.PLATFORM.setAndSyncPlayerData(player,playerBingoData.withTwist(twist));
         }
 
         return players.size();

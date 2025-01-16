@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:the_nether",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "minecraft:the_void",
+      "layers": [
+        {
+          "block": "minecraft:lava",
+          "height": 16
+        }
+      ],
+      "structure_overrides": "minecraft:ocean_ruins"
+    }
+  }
+}

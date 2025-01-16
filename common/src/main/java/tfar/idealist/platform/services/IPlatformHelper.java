@@ -5,8 +5,9 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
-import tfar.idealist.IdeaConfig;
+import tfar.idealist.ExtraPiglinData;
 import tfar.idealist.PlayerBingoData;
 import tfar.idealist.network.C2SModPacket;
 import tfar.idealist.network.S2CAttachmentDataPacket;
@@ -79,11 +80,14 @@ public interface IPlatformHelper {
     void sendToClient(S2CModPacket<?> msg, ServerPlayer player);
     void sendToServer(C2SModPacket<?> msg);
 
-    void setData(Player player, PlayerBingoData twist);
-    default void setAndSyncData(ServerPlayer player,PlayerBingoData data) {
-        setData(player, data);
+    void setPlayerData(Player player, PlayerBingoData twist);
+    default void setAndSyncPlayerData(ServerPlayer player, PlayerBingoData data) {
+        setPlayerData(player, data);
         sendToClient(new S2CAttachmentDataPacket(data), player);
     }
 
-    PlayerBingoData getData(Player player);
+    PlayerBingoData getPlayerData(Player player);
+
+    ExtraPiglinData getPiglinData(Piglin piglin);
+    void setPiglinData(Piglin piglin,ExtraPiglinData extraPiglinData);
 }

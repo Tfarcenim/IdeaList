@@ -4,6 +4,7 @@ package tfar.idealist;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -12,13 +13,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -46,6 +50,7 @@ import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
@@ -96,10 +101,19 @@ public class IdeaListNeoForge {
         ItemEntity entity = event.getItemEntity();
         Entity thrower = entity.getOwner();
         ServerPlayer player = (ServerPlayer) event.getPlayer();
-        if (thrower instanceof Piglin) {
+        if (thrower instanceof Piglin piglin) {
             AdvancementHolder advancement = player.server.getAdvancements().get(IdeaConfig.Defaults.TRADE_PIGLIN);
             if (advancement != null) {
                 AdvancementCommands.Action.GRANT.perform(player,List.of(advancement));
+            }
+            if (!player.getAbilities().instabuild && player.level().dimension() == IdeaList.PIGLIN_PARKOUR_DIM) {
+                PlayerBingoData playerBingoData = Services.PLATFORM.getPlayerData(player);
+                ServerLevel nether = player.getServer().getLevel(Level.NETHER);
+                player.setGameMode(GameType.SURVIVAL);
+                piglin.discard();
+                player.changeDimension(new DimensionTransition(nether,playerBingoData.piglin_parkour_return_pos(),Vec3.ZERO,player.getXRot(),player.getYRot(), entity1 -> {
+
+                }));
             }
         }
     }
@@ -149,11 +163,21 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::levelTick);
         NeoForge.EVENT_BUS.addListener(this::onGrow);
         NeoForge.EVENT_BUS.addListener(this::answerQuestion);
+        NeoForge.EVENT_BUS.addListener(this::respawnPos);
+        NeoForge.EVENT_BUS.addListener(this::eternalItems);
     }
 
     void spawn(PlayerEvent.PlayerRespawnEvent event) {
         Player player = event.getEntity();
         PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), (ServerPlayer) player);
+    }
+
+    void eternalItems(EntityJoinLevelEvent event) {
+        Entity entity = event.getEntity();
+        Level level = event.getLevel();
+        if (!level.isClientSide && level.dimension() == IdeaList.PIGLIN_PARKOUR_DIM && entity instanceof ItemEntity itemEntity) {
+            itemEntity.setUnlimitedLifetime();
+        }
     }
 
     void advEarn(AdvancementEvent.AdvancementEarnEvent event) {
@@ -187,6 +211,24 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.TREX_SKELETON, TRexSkeletonEntity.attributes().build());
     }
 
+    void respawnPos(PlayerRespawnPositionEvent event) {
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        boolean fromEnd  = event.isFromEndFight();
+        if (!fromEnd) {
+            Optional<GlobalPos> lastDeathLocation = player.getLastDeathLocation();
+            if (lastDeathLocation.isPresent()) {
+                if (lastDeathLocation.get().dimension() == IdeaList.PIGLIN_PARKOUR_DIM) {
+                    event.setRespawnLevel(IdeaList.PIGLIN_PARKOUR_DIM);
+                    event.setCopyOriginalSpawnPosition(false);
+                    ServerLevel piglinParkour = player.getServer().getLevel(IdeaList.PIGLIN_PARKOUR_DIM);
+                    event.setDimensionTransition(new DimensionTransition(piglinParkour,IdeaConfig.Server.PIGLIN_PARKOUR_PLAYER_TELEPORT.get(),Vec3.ZERO,player.getXRot(),player.getYRot(),entity -> {
+
+                    }));
+                }
+            }
+        }
+    }
+
     //- When a player tries to kill a cow, the cow stops moving and looks at the player,
     // then the cow along with a bunch of other cows in the "area" bunch up together to form a giant cow mech
     // (the other cows don’t have to be there already, have it so they spawn nearby when the cow is hit then they all rush towards the cow that was hit).
@@ -213,7 +255,7 @@ public class IdeaListNeoForge {
     void attackerShuffle(AttackEntityEvent event) {
         Entity target = event.getTarget();
         Player playerAttacker = event.getEntity();
-        if (Services.PLATFORM.getData(playerAttacker).twist()) {
+        if (Services.PLATFORM.getPlayerData(playerAttacker).twist()) {
             if (target instanceof Player) {
                 Inventory inventory = playerAttacker.getInventory();
                 List<ItemStack> shuffled = new ArrayList<>();
@@ -270,12 +312,12 @@ public class IdeaListNeoForge {
         ItemStack stack = event.getItemStack();
         BlockPos pos = event.getPos();
         BlockState state = player.level().getBlockState(pos);
-        if (Services.PLATFORM.getData(player).twist()) {
+        if (Services.PLATFORM.getPlayerData(player).twist()) {
             if (stack.is(Items.WHEAT_SEEDS) && state.is(Blocks.FARMLAND)) {
                // event.setCancellationResult(InteractionResult.FAIL);
                // event.setCanceled(true);
                 if (!player.level().isClientSide) {
-                    player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).setReturnPos(player.position()).setSeedPos(pos.above()));
+                    player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).setSeedReturnPos(player.position()).setSeedPos(pos.above()));
                     ModSavedData.getOrLoad((ServerLevel) player.level()).addPos(pos);
                     ModEntityTypes.VACUUM.spawn((ServerLevel) player.level(),pos.above(), MobSpawnType.EVENT);
                 }
@@ -298,20 +340,35 @@ public class IdeaListNeoForge {
     void answerQuestion(ServerChatEvent event) {
         String rawText = event.getRawText();
         ServerPlayer player = event.getPlayer();
-        int question = Services.PLATFORM.getData(player).question();
+        int question = Services.PLATFORM.getPlayerData(player).quiz_data().question();
         if (question > -1) {
             QandA qanda = IdeaList.getQuestion(question);
             if (qanda.acceptable_answers().contains(rawText.toLowerCase(Locale.ROOT))) {
-                PlayerBingoData data = Services.PLATFORM.getData(player);
+                PlayerBingoData data = Services.PLATFORM.getPlayerData(player);
                 if (question < 4) {
-                    Services.PLATFORM.setData(player,data.incrementQuestion());
+                    Services.PLATFORM.setPlayerData(player,data.incrementQuestion());
                     IdeaList.askQuestion(player);
                 } else {
-                    IdeaList.spawnPortal(player.serverLevel(),data.deferred_end_portal());
-                    Services.PLATFORM.setData(player,data.resetQuestions());
+                    IdeaList.spawnPortal(player.serverLevel(),data.quiz_data().deferred_end_portal());
+                    UUID uuid = data.quiz_data().enderman();
+                    Entity entity = player.serverLevel().getEntity(uuid);
+                    if (entity instanceof EnderMan enderMan) {
+                        enderMan.setInvulnerable(false);
+                        enderMan.setNoAi(false);
+                        enderMan.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(IdeaList.id("quiz_enderman"));
+                    }
+                    Services.PLATFORM.setPlayerData(player,data.resetQuestions());
                 }
             } else {
                 player.displayClientMessage(Component.literal("Incorrect answer"),false);
+                UUID uuid = Services.PLATFORM.getPlayerData(player).quiz_data().enderman();
+                Entity entity = player.serverLevel().getEntity(uuid);
+                if (entity instanceof EnderMan enderMan) {
+                    enderMan.makeSound(SoundEvents.ENDERMAN_SCREAM);
+                    enderMan.doHurtTarget(player);
+                } else {
+                    player.kill();
+                }
             }
             event.setCanceled(true);
         }
