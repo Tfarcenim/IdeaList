@@ -13,6 +13,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import tfar.idealist.IdeaList;
+import tfar.idealist.client.renderer.*;
 import tfar.idealist.init.ModEntityTypes;
 
 public class ModClientNeoForge {
@@ -29,7 +30,7 @@ public class ModClientNeoForge {
     }
 
     static void renderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntityTypes.ANIMATED_BLOCK,AnimatedBlockRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.ANIMATED_BLOCK, AnimatedBlockRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.WORM,context -> new WormRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("worm"))));
         event.registerEntityRenderer(ModEntityTypes.ANT,context -> new AntRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("ant"))));
         event.registerEntityRenderer(ModEntityTypes.SPARROW,context -> new SparrowRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("sparrow"))));

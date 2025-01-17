@@ -1,6 +1,8 @@
 package tfar.idealist.network;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -19,6 +21,20 @@ public class PacketHandler {
         Services.PLATFORM.registerClientPlayPacket(S2CAttachmentDataPacket.TYPE, S2CAttachmentDataPacket.STREAM_CODEC);
 
 
+    }
+
+    public static <B extends FriendlyByteBuf, V extends Enum<V>> StreamCodec<B, V> enumCodec(final Class<V> enumClass) {
+        return new StreamCodec<>() {
+            @Override
+            public V decode(B buf) {
+                return buf.readEnum(enumClass);
+            }
+
+            @Override
+            public void encode(B buf, V value) {
+                buf.writeEnum(value);
+            }
+        };
     }
 
     public static void sendToServer(C2SModPacket<?> packet) {

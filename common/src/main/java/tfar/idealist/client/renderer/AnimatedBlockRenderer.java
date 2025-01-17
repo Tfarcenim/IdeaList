@@ -1,4 +1,4 @@
-package tfar.idealist.client;
+package tfar.idealist.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -9,16 +9,16 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import tfar.idealist.client.AnimatedBlockModel;
 import tfar.idealist.entity.AnimatedBlockEntity;
 
-public class AnimatedBlockRenderer extends HumanoidMobRenderer<AnimatedBlockEntity,AnimatedBlockModel> {
+public class AnimatedBlockRenderer extends HumanoidMobRenderer<AnimatedBlockEntity, AnimatedBlockModel> {
     private final BlockRenderDispatcher dispatcher;
 
     public AnimatedBlockRenderer(EntityRendererProvider.Context context) {

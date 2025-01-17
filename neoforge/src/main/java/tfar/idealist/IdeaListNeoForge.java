@@ -62,6 +62,7 @@ import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
 import tfar.idealist.entity.*;
 import tfar.idealist.init.AttachmentTypes;
+import tfar.idealist.init.ModEntityDataSerializers;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.network.PacketHandler;
 import tfar.idealist.network.S2CAttachmentDataPacket;
@@ -125,6 +126,9 @@ public class IdeaListNeoForge {
             for (Pair<ResourceLocation,Supplier<?>> pair : list) {
                 event.register((ResourceKey<? extends Registry<Object>>)registry.key(),pair.getLeft(),(Supplier<Object>)pair.getValue());
             }
+        }
+        if (event.getRegistry() == NeoForgeRegistries.ENTITY_DATA_SERIALIZERS) {
+            event.register(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS.key(),IdeaList.id("stage"),() -> ModEntityDataSerializers.STAGE);
         }
     }
 
@@ -209,6 +213,7 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.ANT, AntEntity.attributes().build());
         event.put(ModEntityTypes.SPARROW, SparrowEntity.attributes().build());
         event.put(ModEntityTypes.TREX_SKELETON, TRexSkeletonEntity.attributes().build());
+        event.put(ModEntityTypes.SEED,SeedEntity.attributes().build());
     }
 
     void respawnPos(PlayerRespawnPositionEvent event) {
