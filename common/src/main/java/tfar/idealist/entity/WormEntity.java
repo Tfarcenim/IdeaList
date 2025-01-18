@@ -34,7 +34,7 @@ public class WormEntity extends PathfinderMob implements GeoEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, true));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, SeedEntity.class, false));
     }
 
     public static AttributeSupplier.Builder attributes() {

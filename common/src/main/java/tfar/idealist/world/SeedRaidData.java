@@ -28,7 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import tfar.idealist.IdeaConfig;
 import tfar.idealist.IdeaList;
 import tfar.idealist.PlayerBingoData;
+import tfar.idealist.entity.SeedEntity;
 import tfar.idealist.entity.SparrowEntity;
+import tfar.idealist.entity.WormEntity;
 import tfar.idealist.init.ModEntityTypes;
 import tfar.idealist.platform.Services;
 
@@ -52,6 +54,8 @@ public class SeedRaidData extends SavedData {
     public static final int TIME = 20 * 60;
     int activeWave;
     List<Mob> waveEntities = new ArrayList<>();
+
+    SeedEntity seedEntity;
 
     final List<Wave> waves = new ArrayList<>();
     boolean active;
@@ -86,10 +90,13 @@ public class SeedRaidData extends SavedData {
                 if (activeWave >= waves.size()) {
                     end();
                 } else {
-                    spawnNextWave();
+                    spawnNextWave(false);
                 }
             } else {
-                waveEntities.removeIf(living -> living.isRemoved());
+                waveEntities.removeIf(Entity::isRemoved);
+            }
+            if (active && seedEntity != null && !seedEntity.isAlive()) {
+                end();
             }
         }
     }
@@ -97,9 +104,29 @@ public class SeedRaidData extends SavedData {
     void end() {
         active = false;
         PlayerBingoData data = Services.PLATFORM.getPlayerData(cause);
+        boolean win = seedEntity.isAlive();
+        if (win) {
+            seedEntity.discard();
+        } else {
+            for (Mob mob : waveEntities) {
+                mob.discard();
+            }
+        }
         cause.changeDimension(new DimensionTransition(cause.server.overworld(),
-                data.seed_return_pos(), Vec3.ZERO,cause.getXRot(),cause.getYRot(),false,SEED_LEAVE_TRANSITION_WIN));
+                data.seed_return_pos(), Vec3.ZERO,cause.getXRot(),cause.getYRot(),false,win ? SEED_LEAVE_TRANSITION_WIN:SEED_LEAVE_TRANSITION_LOSS ));
     }
+
+    public static final DimensionTransition.PostDimensionTransition SEED_LEAVE_TRANSITION_LOSS = entity -> {
+        if (entity instanceof ServerPlayer player) {
+            PlayerBingoData data = Services.PLATFORM.getPlayerData(player);
+            BlockPos pos = data.seed_pos();
+            ModSavedData.getOrLoad(player.serverLevel()).removePos(pos);
+            BlockState state = player.level().getBlockState(pos);
+            if (state.is(Blocks.WHEAT)) {
+                player.level().destroyBlock(pos,true);
+            }
+        }
+    };
 
     public static final DimensionTransition.PostDimensionTransition SEED_LEAVE_TRANSITION_WIN = entity -> {
         if (entity instanceof ServerPlayer player) {
@@ -120,12 +147,20 @@ public class SeedRaidData extends SavedData {
         //raidEvent.addPlayer(player);
         waves.clear();
         waves.add(Wave.WAVE_1);
-        spawnNextWave();
+        waves.add(Wave.WAVE_2);
+        waves.add(Wave.WAVE_3);
+        waves.add(Wave.WAVE_4);
+        seedEntity = ModEntityTypes.SEED_1.spawn(level,BlockPos.containing(IdeaConfig.Server.SEED_TELEPORT.get()),MobSpawnType.EVENT);
+        level.addFreshEntity(seedEntity);
+        spawnNextWave(true);
     }
 
-    void spawnNextWave() {
+    void spawnNextWave(boolean first) {
+    if (!first) {
+        seedEntity.grow();
+    }
+        Wave wave = waves.get(activeWave);
         activeWave++;
-        Wave wave = waves.get(activeWave-1);
         for (Object2IntMap.Entry<EntityType<? extends Mob>> entry :  wave.mobs().object2IntEntrySet()) {
             int count = entry.getIntValue();
             for (int i = 0; i < count;i++) {
@@ -136,6 +171,12 @@ public class SeedRaidData extends SavedData {
                     entity.addEffect(new MobEffectInstance(MobEffects.GLOWING,MobEffectInstance.INFINITE_DURATION));
                     if (entity instanceof SparrowEntity sparrowEntity) {
                         sparrowEntity.setAnchorPoint(cause.blockPosition().above(10));
+                    }
+
+                    if (entity instanceof WormEntity) {
+                        entity.setTarget(seedEntity);
+                    } else {
+                        entity.setTarget(cause);
                     }
 
                     waveEntities.add(entity);
@@ -183,6 +224,10 @@ public class SeedRaidData extends SavedData {
 
     static String name(ServerLevel level) {
         return IdeaList.MOD_ID +"_"+level.dimension().location().getPath()+"_seed_raid";
+    }
+
+    public void updateSeedEntity(SeedEntity seedEntity) {
+        this.seedEntity = seedEntity;
     }
 
     record Wave(Object2IntMap<EntityType<? extends Mob>> mobs) {

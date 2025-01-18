@@ -213,7 +213,9 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.ANT, AntEntity.attributes().build());
         event.put(ModEntityTypes.SPARROW, SparrowEntity.attributes().build());
         event.put(ModEntityTypes.TREX_SKELETON, TRexSkeletonEntity.attributes().build());
-        event.put(ModEntityTypes.SEED,SeedEntity.attributes().build());
+        event.put(ModEntityTypes.SEED_1,SeedEntity.attributes().build());
+        event.put(ModEntityTypes.SEED_1_TO_2,SeedEntity.attributes().build());
+        event.put(ModEntityTypes.SEED_2,SeedEntity.attributes().build());
     }
 
     void respawnPos(PlayerRespawnPositionEvent event) {

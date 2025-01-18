@@ -2,7 +2,6 @@ package tfar.idealist.init;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.PathfinderMob;
 import tfar.idealist.entity.*;
 
 public class ModEntityTypes {
@@ -12,9 +11,19 @@ public class ModEntityTypes {
             .clientTrackingRange(8).build("");
     public static final EntityType<AntEntity> ANT = EntityType.Builder.of(AntEntity::new,MobCategory.MONSTER).sized(1.4f,.9f).clientTrackingRange(8).build("");
     public static final EntityType<SparrowEntity> SPARROW = EntityType.Builder.of(SparrowEntity::new,MobCategory.MONSTER).sized(2.5f,2.5f).clientTrackingRange(8).build("");
-    public static final EntityType<SeedEntity> SEED = EntityType.Builder.of(SeedEntity::new,MobCategory.MISC)
+
+    public static final EntityType<SeedEntity> SEED_1 = EntityType.Builder.of(SeedEntity::createSeed1,MobCategory.MISC)
             .sized(1,5f)
             .clientTrackingRange(8).build("");
+
+    public static final EntityType<SeedEntity> SEED_1_TO_2 = EntityType.Builder.of(SeedEntity::createSeed1to2,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
+    public static final EntityType<SeedEntity> SEED_2 = EntityType.Builder.of(SeedEntity::createSeed2,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
 
     public static final EntityType<VacuumEntity> VACUUM = EntityType.Builder.of(VacuumEntity::new,MobCategory.MISC)
             .sized(1,1).build("");

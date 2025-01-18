@@ -4,7 +4,7 @@
 		"idle": {
 			"loop": "hold_on_last_frame"
 		},
-		"sprout": {
+		"grow": {
 			"loop": "hold_on_last_frame",
 			"animation_length": 1.4583,
 			"override_previous_animation": true,

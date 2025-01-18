@@ -265,6 +265,12 @@ public class IdeaList {
             ci.cancel();
         }
     }
+
+    public static <E extends Enum<E>> E cycle(E e) {
+        E[] values = (E[]) e.getClass().getEnumConstants();
+        return values[(e.ordinal() + 1) % values.length];
+    }
+
 }
 
 //- When a player tries to kill a cow, the cow stops moving and looks at the player, then the cow along with a bunch of other cows in the "area" bunch up together to form a giant cow mech (the other cows don’t have to be there already, have it so they spawn nearby when the cow is hit then they all rush towards the cow that was hit). The cow mech can shoot lasers out of its eyes for 10 seconds at a time (cooldown 10 seconds) causing half a heart of damage a hit. The cow mech has 150 health.

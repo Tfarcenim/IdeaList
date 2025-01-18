@@ -38,7 +38,7 @@ public class AntEntity extends PathfinderMob implements GeoEntity {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, true));
+        this.goalSelector.addGoal(4, new GeoMeleeAttackGoal<>(this, 1.0, true));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
@@ -96,12 +96,10 @@ public class AntEntity extends PathfinderMob implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<GeoAnimatable>(this, "idle_controller", 0, event -> {
-            boolean isAttacking = this.swinging;
+        controllers.add(new AnimationController<GeoAnimatable>(this, "controller", 5, event -> {
             boolean isDead = this.dead || this.getHealth() < 0.01 || this.isDeadOrDying();
-            boolean isFastMoving = getDeltaMovement().lengthSqr() > .01;
 
-            if (event.isMoving() && !isDead && !isAttacking) {
+            if (event.isMoving() && !isDead) {
                 return event.setAndContinue(DefaultAnimations.WALK);
             }
             return event.setAndContinue(DefaultAnimations.IDLE);
@@ -124,9 +122,9 @@ public class AntEntity extends PathfinderMob implements GeoEntity {
     protected void tickDeath() {
         ++this.deathTime;
         if (deathTime == 1) {
-            this.triggerAnim("idle_controller", "death");
+            this.triggerAnim("controller", "death");
         }
-        if (this.deathTime >= 30 && !isRemoved() && !level().isClientSide) {
+        if (this.deathTime >= 20 && !isRemoved() && !level().isClientSide) {
             this.level().broadcastEntityEvent(this, EntityEvent.POOF);
             this.remove(RemovalReason.KILLED);
         }

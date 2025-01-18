@@ -37,6 +37,9 @@ public class ModClientNeoForge {
         event.registerEntityRenderer(ModEntityTypes.VACUUM,context -> new VacuumRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("vacuum"))));
         event.registerEntityRenderer(ModEntityTypes.TREX_SKELETON,context -> new TRexSkeletonRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("trex_skeleton"))));
 
+        event.registerEntityRenderer(ModEntityTypes.SEED_1,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_1"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_1_TO_2,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_1_to_2"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_2,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_2"))));
     }
 
 

@@ -54,7 +54,7 @@ public class ModLangProvider extends LanguageProvider {
         addDefaultEntityType(() -> ModEntityTypes.WORM);
         addDefaultEntityType(() -> ModEntityTypes.SPARROW);
         addDefaultEntityType(() -> ModEntityTypes.ANT);
-        addDefaultEntityType(() -> ModEntityTypes.SEED);
+        addDefaultEntityType(() -> ModEntityTypes.SEED_1);
         addDefaultEntityType(() -> ModEntityTypes.VACUUM);
         addDefaultEntityType(() -> ModEntityTypes.TREX_SKELETON);
         addDefaultEntityType(() -> ModEntityTypes.COW_MECH);
