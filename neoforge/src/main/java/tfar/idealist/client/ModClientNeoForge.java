@@ -40,6 +40,10 @@ public class ModClientNeoForge {
         event.registerEntityRenderer(ModEntityTypes.SEED_1,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_1"))));
         event.registerEntityRenderer(ModEntityTypes.SEED_1_TO_2,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_1_to_2"))));
         event.registerEntityRenderer(ModEntityTypes.SEED_2,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_2"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_2_TO_3,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_2_to_3"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_3,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_3"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_3_TO_4,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_3_to_4"))));
+        event.registerEntityRenderer(ModEntityTypes.SEED_4,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_4"))));
     }
 
 

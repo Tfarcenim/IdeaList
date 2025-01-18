@@ -24,6 +24,22 @@ public class ModEntityTypes {
             .sized(1,5f)
             .clientTrackingRange(8).build("");
 
+    public static final EntityType<SeedEntity> SEED_2_TO_3 = EntityType.Builder.of(SeedEntity::createSeed2to3,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
+    public static final EntityType<SeedEntity> SEED_3 = EntityType.Builder.of(SeedEntity::createSeed3,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
+    public static final EntityType<SeedEntity> SEED_3_TO_4 = EntityType.Builder.of(SeedEntity::createSeed3to4,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
+    public static final EntityType<SeedEntity> SEED_4 = EntityType.Builder.of(SeedEntity::createSeed4,MobCategory.MISC)
+            .sized(1,5f)
+            .clientTrackingRange(8).build("");
+
 
     public static final EntityType<VacuumEntity> VACUUM = EntityType.Builder.of(VacuumEntity::new,MobCategory.MISC)
             .sized(1,1).build("");

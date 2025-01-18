@@ -136,6 +136,7 @@ public class SeedRaidData extends SavedData {
             BlockState state = player.level().getBlockState(pos);
             if (state.is(Blocks.WHEAT)) {
                 player.level().setBlock(pos,state.setValue(CropBlock.AGE,7),3);
+                ModEntityTypes.SEED_4.spawn(player.serverLevel(),pos,MobSpawnType.EVENT);
             }
         }
     };

@@ -34,7 +34,15 @@ public class SeedEntity extends Mob implements GeoEntity {
     protected int transition_time;
 
     public enum Stage {
-        SEED_1(-1, ModEntityTypes.SEED_1),SEED_1_TO_2(29,ModEntityTypes.SEED_1_TO_2),SEED_2(-1,ModEntityTypes.SEED_2);
+        SEED_1(-1, ModEntityTypes.SEED_1),
+        SEED_1_TO_2(29,ModEntityTypes.SEED_1_TO_2),
+        SEED_2(-1,ModEntityTypes.SEED_2),
+        SEED_2_TO_3(94,ModEntityTypes.SEED_2_TO_3),
+        SEED_3(-1,ModEntityTypes.SEED_3),
+        SEED_3_TO_4(60,ModEntityTypes.SEED_3_TO_4),
+        SEED_4(-1,ModEntityTypes.SEED_4),
+
+        ;
 
         private final int transition;
         private final EntityType<? extends SeedEntity> type;
@@ -76,6 +84,22 @@ public class SeedEntity extends Mob implements GeoEntity {
         return new SeedEntity(entityType,level,Stage.SEED_2);
     }
 
+    public static SeedEntity createSeed2to3(EntityType<? extends Mob> entityType, Level level) {
+        return new SeedEntity(entityType,level,Stage.SEED_2_TO_3);
+    }
+
+    public static SeedEntity createSeed3(EntityType<? extends Mob> entityType, Level level) {
+        return new SeedEntity(entityType,level,Stage.SEED_3);
+    }
+
+    public static SeedEntity createSeed3to4(EntityType<? extends Mob> entityType, Level level) {
+        return new SeedEntity(entityType,level,Stage.SEED_3_TO_4);
+    }
+
+    public static SeedEntity createSeed4(EntityType<? extends Mob> entityType, Level level) {
+        return new SeedEntity(entityType,level,Stage.SEED_4);
+    }
+
     public void grow() {
         if (stage != Stage.LAST) {
             discard();
@@ -88,7 +112,7 @@ public class SeedEntity extends Mob implements GeoEntity {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         Entity entity= source.getEntity();
-        if (entity instanceof Player) {
+        if (entity instanceof Player && level().dimension() == IdeaList.SEED_DIM) {
             return false;
         }
         return super.hurt(source, amount);
