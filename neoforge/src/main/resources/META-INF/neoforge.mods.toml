@@ -29,9 +29,9 @@ versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.${mod_id}]]
-modId = "worldedit"
+modId = "smartbrainlib"
 type="required" #mandatory (Can be one of "required", "optional", "incompatible" or "discouraged")
-versionRange = "[7.3,)"
+versionRange = "[1.16,)"
 ordering = "NONE"
 side = "BOTH"
 

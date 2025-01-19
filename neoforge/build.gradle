@@ -70,6 +70,9 @@ dependencies {
         exclude group: "com.google.guava"
         exclude group: "org.apache.logging.log4j"
     }
+
+    implementation "net.tslat.smartbrainlib:SmartBrainLib-neoforge-${project.minecraft_version}:${project.sbl_version}"
+
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }

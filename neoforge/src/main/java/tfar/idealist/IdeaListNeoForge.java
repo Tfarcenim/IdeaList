@@ -220,6 +220,7 @@ public class IdeaListNeoForge {
         event.put(ModEntityTypes.SEED_3,SeedEntity.attributes().build());
         event.put(ModEntityTypes.SEED_3_TO_4,SeedEntity.attributes().build());
         event.put(ModEntityTypes.SEED_4,SeedEntity.attributes().build());
+        event.put(ModEntityTypes.COW_MECH,CowMechEntity.attributes().build());
     }
 
     void respawnPos(PlayerRespawnPositionEvent event) {

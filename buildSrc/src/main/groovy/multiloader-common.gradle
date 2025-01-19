@@ -68,6 +68,11 @@ repositories {
         //   }
     }
 
+    maven {
+        name = "SmartBrainLib (SBL) Maven Repo"
+        url = "https://dl.cloudsmith.io/public/tslat/sbl/maven/"
+    }
+
 }
 
 // Declare capabilities on the outgoing configurations.

@@ -97,7 +97,7 @@ public class AntEntity extends PathfinderMob implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<GeoAnimatable>(this, "controller", 5, event -> {
-            boolean isDead = this.dead || this.getHealth() < 0.01 || this.isDeadOrDying();
+            boolean isDead = this.dead || this.isDeadOrDying();
 
             if (event.isMoving() && !isDead) {
                 return event.setAndContinue(DefaultAnimations.WALK);

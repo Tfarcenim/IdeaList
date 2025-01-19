@@ -44,6 +44,7 @@ public class ModClientNeoForge {
         event.registerEntityRenderer(ModEntityTypes.SEED_3,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_3"))));
         event.registerEntityRenderer(ModEntityTypes.SEED_3_TO_4,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_3_to_4"))));
         event.registerEntityRenderer(ModEntityTypes.SEED_4,context -> new SeedRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("seed_stages/seed_4"))));
+        event.registerEntityRenderer(ModEntityTypes.COW_MECH,context -> new CowMechRenderer(context,new DefaultedEntityGeoModel<>(IdeaList.id("cow_mech"))));
     }
 
 

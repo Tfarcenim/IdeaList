@@ -50,7 +50,7 @@ public class ModEntityTypes {
             .build("");
 
     public static final EntityType<CowMechEntity> COW_MECH = EntityType.Builder.of(CowMechEntity::new,MobCategory.MONSTER)
-            .sized(3.5f,2.5f)
+            .sized(3.875f,9f)
             .clientTrackingRange(8)
             .build("");
 
