@@ -8,6 +8,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -17,6 +18,7 @@ import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
 import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
 import net.tslat.smartbrainlib.api.core.behaviour.FirstApplicableBehaviour;
 import net.tslat.smartbrainlib.api.core.behaviour.OneRandomBehaviour;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.attack.AnimatableMeleeAttack;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.attack.AnimatableRangedAttack;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.look.LookAtTarget;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.misc.Idle;
@@ -73,7 +75,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
     public static AttributeSupplier.Builder attributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE,5)
-                .add(Attributes.MAX_HEALTH,200)
+                .add(Attributes.MAX_HEALTH,150)
                 .add(Attributes.MOVEMENT_SPEED,.2)
                 .add(Attributes.STEP_HEIGHT,2)
                 .add(Attributes.KNOCKBACK_RESISTANCE,1);
@@ -108,7 +110,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         if (deathTime == 1) {
             this.triggerAnim("controller", "death");
         }
-        if (this.deathTime >= 20 && !isRemoved() && !level().isClientSide) {
+        if (this.deathTime >= 32 && !isRemoved() && !level().isClientSide) {
             this.level().broadcastEntityEvent(this, EntityEvent.POOF);
             this.remove(RemovalReason.KILLED);
         }
@@ -152,7 +154,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         return BrainActivityGroup.idleTasks(
                 new FirstApplicableBehaviour<>(      // Run only one of the below behaviours, trying each one in order. Include the generic type because JavaC is silly
                         new TargetOrRetaliate<>()
-                                .attackablePredicate(entity -> entity.isAlive() && (!(entity instanceof Player player) || !player.isCreative())),            // Set the attack target and walk target based on nearby entities
+                                .attackablePredicate(entity -> tickCount > 120 && entity.isAlive() && (!(entity instanceof Player player) || !player.isCreative())),            // Set the attack target and walk target based on nearby entities
                         new SetPlayerLookTarget<>(),          // Set the look target for the nearest player
                         new SetRandomLookTarget<>()),         // Set a random look target
                 new OneRandomBehaviour<>(                 // Run a random task from the below options
@@ -171,14 +173,14 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
 
 
                 new OneRandomBehaviour<>(
-                       /* Pair.of(new AnimatableMeleeAttack<>(25) { // Melee attack the target if close enough
+                        Pair.of(new AnimatableMeleeAttack<>(25) { // Melee attack the target if close enough
                             @Override
                             protected void start(Mob entity) {
                                 BehaviorUtils.lookAtEntity(entity, this.target);
                                 triggerAnim("controller", "slam");
                             }
-                        }.attackInterval(mob -> 37), 9),*/
-                        Pair.of(new LaserAttackBehavior(20),3)
+                        }.attackInterval(mob -> 400), 9),
+                        Pair.of(new LaserAttackBehavior(200),3)
                 )
         );
     }
@@ -208,6 +210,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
     public class LaserAttackBehavior extends AnimatableRangedAttack<CowMechEntity> {
         public LaserAttackBehavior(int delayTicks) {
             super(delayTicks);
+            attackRadius(24);
         }
 
         @Override
@@ -221,6 +224,9 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
             super.tick(entity);
             if (target != null) {
                 setLaserTarget(target.position().add(0,target.getBbHeight()/2,0).toVector3f());
+                if (entity.tickCount%20 == 0) {
+                    performRangedAttack(target,1);
+                }
             }
         }
 

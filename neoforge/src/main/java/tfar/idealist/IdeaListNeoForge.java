@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -51,9 +53,11 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -169,6 +173,26 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::answerQuestion);
         NeoForge.EVENT_BUS.addListener(this::respawnPos);
         NeoForge.EVENT_BUS.addListener(this::eternalItems);
+        NeoForge.EVENT_BUS.addListener(this::livingTick);
+        NeoForge.EVENT_BUS.addListener(this::onDeath);
+    }
+
+    void livingTick(EntityTickEvent.Post event) {
+        if (event.getEntity() instanceof Cow cow && !cow.level().isClientSide) {
+            ExtraCowData extraCowData = cow.getData(AttachmentTypes.EXTRA_COW_DATA);
+            if (extraCowData.morph_countdown() >-1) {
+                cow.setData(AttachmentTypes.EXTRA_COW_DATA,extraCowData.tick());
+                if (extraCowData.morph_countdown() ==1) {
+
+                    List<Cow> cows = cow.level().getEntitiesOfClass(Cow.class,cow.getBoundingBox().inflate(10,4,10));
+                    for (Cow cow1 : cows) {
+                        cow1.discard();
+                    }
+                    cow.discard();
+                    CowMechEntity spawn = ModEntityTypes.COW_MECH.spawn((ServerLevel) cow.level(), cow.blockPosition(), MobSpawnType.EVENT);
+                }
+            }
+        }
     }
 
     void spawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -181,6 +205,17 @@ public class IdeaListNeoForge {
         Level level = event.getLevel();
         if (!level.isClientSide && level.dimension() == IdeaList.PIGLIN_PARKOUR_DIM && entity instanceof ItemEntity itemEntity) {
             itemEntity.setUnlimitedLifetime();
+        }
+    }
+
+    void onDeath(LivingDeathEvent event) {
+        LivingEntity target = event.getEntity();
+        DamageSource source = event.getSource();
+        if (source.getEntity() instanceof Player player && target instanceof CowMechEntity) {
+            AdvancementHolder advancement = player.getServer().getAdvancements().get(IdeaConfig.Defaults.KILL_COW);
+            if (advancement != null) {
+                AdvancementCommands.Action.GRANT.perform((ServerPlayer) player, List.of(advancement));
+            }
         }
     }
 
@@ -246,6 +281,8 @@ public class IdeaListNeoForge {
     // (the other cows don’t have to be there already, have it so they spawn nearby when the cow is hit then they all rush towards the cow that was hit).
     // The cow mech can shoot lasers out of its eyes for 10 seconds at a time (cooldown 10 seconds) causing half a heart of damage a hit. The cow mech has 150 health.
 
+
+
     void cowRevenge(LivingIncomingDamageEvent event) {
         LivingEntity target = event.getEntity();
         DamageSource source = event.getSource();
@@ -256,8 +293,18 @@ public class IdeaListNeoForge {
                 cow.getNavigation().stop();
                 cow.getLookControl().setLookAt(playerAttacker);
                 event.setCanceled(true);
-                for (int i = 0; i < 9; i++) {
 
+                ExtraCowData data = cow.getData(AttachmentTypes.EXTRA_COW_DATA);
+                if (data.morph_countdown() < 0 && cow.tickCount > 400) {
+
+                    BlockPos cowPos = cow.blockPosition();
+                    for (int i = 0; i < 15; i++) {
+                        double x = cowPos.getX() + 5 * (Math.random() - .5);
+                        double z = cowPos.getZ() + 5 * (Math.random() - .5);
+                        BlockPos spawn = cow.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos((int) x, 0, (int) z));
+                        EntityType.COW.spawn((ServerLevel) cow.level(), spawn, MobSpawnType.EVENT);
+                    }
+                    cow.setData(AttachmentTypes.EXTRA_COW_DATA, new ExtraCowData(200));
                 }
             }
         }
