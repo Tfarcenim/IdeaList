@@ -1,19 +1,23 @@
 package tfar.idealist.entity;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.tslat.smartbrainlib.api.SmartBrainOwner;
 import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
 import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
 import net.tslat.smartbrainlib.api.core.behaviour.FirstApplicableBehaviour;
 import net.tslat.smartbrainlib.api.core.behaviour.OneRandomBehaviour;
-import net.tslat.smartbrainlib.api.core.behaviour.custom.attack.AnimatableMeleeAttack;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.attack.AnimatableRangedAttack;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.look.LookAtTarget;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.misc.Idle;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.move.FloatToSurfaceOfFluid;
@@ -27,6 +31,7 @@ import net.tslat.smartbrainlib.api.core.behaviour.custom.target.TargetOrRetaliat
 import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
+import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -37,9 +42,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
 
-public class CowMechEntity extends PathfinderMob implements GeoEntity, SmartBrainOwner<CowMechEntity> {
+public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAttackMob,SmartBrainOwner<CowMechEntity> {
 
     protected Player aggro;
+
+    private static final EntityDataAccessor<Vector3f> DATA_LASER_POS = SynchedEntityData.defineId(CowMechEntity.class, EntityDataSerializers.VECTOR3);
+    private static final EntityDataAccessor<Boolean> DATA_LASER_ACTIVE = SynchedEntityData.defineId(CowMechEntity.class,EntityDataSerializers.BOOLEAN);
 
     protected final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     public CowMechEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
@@ -69,6 +77,29 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, SmartBrai
                 .add(Attributes.MOVEMENT_SPEED,.2)
                 .add(Attributes.STEP_HEIGHT,2)
                 .add(Attributes.KNOCKBACK_RESISTANCE,1);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_LASER_ACTIVE,false);
+        builder.define(DATA_LASER_POS,new Vector3f());
+    }
+
+    public void setLaserActive(boolean laserActive) {
+        entityData.set(DATA_LASER_ACTIVE,laserActive);
+    }
+
+    public boolean isLaserActive() {
+        return entityData.get(DATA_LASER_ACTIVE);
+    }
+
+    public void setLaserTarget(Vector3f vector3f) {
+        entityData.set(DATA_LASER_POS,vector3f);
+    }
+
+    public Vector3f getLaserTarget() {
+        return entityData.get(DATA_LASER_POS);
     }
 
     @Override
@@ -140,15 +171,16 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, SmartBrai
 
 
                 new OneRandomBehaviour<>(
-                        Pair.of(new AnimatableMeleeAttack<>(25) {
+                       /* Pair.of(new AnimatableMeleeAttack<>(25) { // Melee attack the target if close enough
                             @Override
                             protected void start(Mob entity) {
                                 BehaviorUtils.lookAtEntity(entity, this.target);
                                 triggerAnim("controller", "slam");
                             }
-                        }.attackInterval(mob -> 37), 9)
+                        }.attackInterval(mob -> 37), 9),*/
+                        Pair.of(new LaserAttackBehavior(20),3)
                 )
-        ); // Melee attack the target if close enough
+        );
     }
 
     @Override
@@ -160,5 +192,42 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, SmartBrai
     protected void customServerAiStep() {
         super.customServerAiStep();
         tickBrain(this);
+    }
+
+    @Override
+    public void performRangedAttack(LivingEntity target, float velocity) {
+        Vector3f laserPos = getLaserTarget();
+        double distSqr = target.distanceToSqr(new Vec3(laserPos));
+        if (distSqr < 1) {
+            target.hurt(damageSources().indirectMagic(this, this), 1);
+            doHurtTarget(target);
+
+        }
+    }
+
+    public class LaserAttackBehavior extends AnimatableRangedAttack<CowMechEntity> {
+        public LaserAttackBehavior(int delayTicks) {
+            super(delayTicks);
+        }
+
+        @Override
+        protected void start(CowMechEntity entity) {
+            super.start(entity);
+            setLaserActive(true);
+        }
+
+        @Override
+        protected void tick(CowMechEntity entity) {
+            super.tick(entity);
+            if (target != null) {
+                setLaserTarget(target.position().add(0,target.getBbHeight()/2,0).toVector3f());
+            }
+        }
+
+        @Override
+        protected void stop(CowMechEntity entity) {
+            super.stop(entity);
+            setLaserActive(false);
+        }
     }
 }
