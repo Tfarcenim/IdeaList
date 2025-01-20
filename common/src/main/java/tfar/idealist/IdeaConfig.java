@@ -51,7 +51,7 @@ public class IdeaConfig {
 
         public static final QandA Q3 = new QandA("How many music discs are in the game?",Sets.newHashSet("fifteen","15"));
 
-        public static final QandA Q4 = new QandA("What is Walter white’s age in season 3 of breaking bad?",Sets.newHashSet("fifty","50"));
+        public static final QandA Q4 = new QandA("What is Walter white's age in season 3 of breaking bad?",Sets.newHashSet("fifty","50"));
 
     }
 

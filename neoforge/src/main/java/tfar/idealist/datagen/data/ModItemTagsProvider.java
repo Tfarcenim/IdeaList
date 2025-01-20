@@ -14,6 +14,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
-        //tag(ModTags.Items.PREVENTS_DISMOUNT).add(Items.SLIME_BALL,Items.STRING);
+
     }
 }

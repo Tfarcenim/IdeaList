@@ -45,7 +45,7 @@ public class ModEntityTypes {
             .sized(1,1).build("");
 
     public static final EntityType<TRexSkeletonEntity> TREX_SKELETON = EntityType.Builder.of(TRexSkeletonEntity::new,MobCategory.MONSTER)
-            .sized(3.5f,2.5f)
+            .sized(4.5f,5.5f)
             .clientTrackingRange(8)
             .build("");
 

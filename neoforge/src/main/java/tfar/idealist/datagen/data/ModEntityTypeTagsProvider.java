@@ -19,5 +19,6 @@ public class ModEntityTypeTagsProvider extends EntityTypeTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
         tag(EntityTypeTags.UNDEAD).add(ModEntityTypes.TREX_SKELETON);
+        tag(EntityTypeTags.ARTHROPOD).add(ModEntityTypes.ANT);
     }
 }

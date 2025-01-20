@@ -68,6 +68,7 @@ import tfar.idealist.entity.*;
 import tfar.idealist.init.AttachmentTypes;
 import tfar.idealist.init.ModEntityDataSerializers;
 import tfar.idealist.init.ModEntityTypes;
+import tfar.idealist.init.ModItems;
 import tfar.idealist.network.PacketHandler;
 import tfar.idealist.network.S2CAttachmentDataPacket;
 import tfar.idealist.platform.PacketHandlerNeoForge;
@@ -149,8 +150,15 @@ public class IdeaListNeoForge {
     }
 
     void login(PlayerEvent.PlayerLoggedInEvent event) {
-        Player player = event.getEntity();
-        PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), (ServerPlayer) player);
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        ModSavedData modSavedData = ModSavedData.getOrLoad(player.server.overworld());
+        if (!modSavedData.hasJoinedBefore(player)) {
+            modSavedData.addPlayer(player);
+            player.addItem(ModItems.BINGO_CARD.getDefaultInstance());
+        }
+
+
+        PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), player);
     }
 
 

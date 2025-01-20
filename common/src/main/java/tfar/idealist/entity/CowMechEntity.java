@@ -1,9 +1,14 @@
 package tfar.idealist.entity;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -11,11 +16,16 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.tslat.smartbrainlib.api.SmartBrainOwner;
 import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
 import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
+import net.tslat.smartbrainlib.api.core.behaviour.AllApplicableBehaviours;
 import net.tslat.smartbrainlib.api.core.behaviour.FirstApplicableBehaviour;
 import net.tslat.smartbrainlib.api.core.behaviour.OneRandomBehaviour;
 import net.tslat.smartbrainlib.api.core.behaviour.custom.attack.AnimatableMeleeAttack;
@@ -33,6 +43,7 @@ import net.tslat.smartbrainlib.api.core.behaviour.custom.target.TargetOrRetaliat
 import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -50,11 +61,12 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
 
     private static final EntityDataAccessor<Vector3f> DATA_LASER_POS = SynchedEntityData.defineId(CowMechEntity.class, EntityDataSerializers.VECTOR3);
     private static final EntityDataAccessor<Boolean> DATA_LASER_ACTIVE = SynchedEntityData.defineId(CowMechEntity.class,EntityDataSerializers.BOOLEAN);
+    protected int laserCooldown;
+    protected int buildCountdown;
 
     protected final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     public CowMechEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
-        this.triggerAnim("controller", "spawn");
     }
 
     @Override
@@ -75,6 +87,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
     public static AttributeSupplier.Builder attributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE,5)
+                .add(Attributes.FOLLOW_RANGE,24)
                 .add(Attributes.MAX_HEALTH,150)
                 .add(Attributes.MOVEMENT_SPEED,.2)
                 .add(Attributes.STEP_HEIGHT,2)
@@ -115,10 +128,44 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
             this.remove(RemovalReason.KILLED);
         }
     }
+    public void destroyBlocks() {
+        if (this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+            boolean flag = false;
+            int l = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
+            int i1 = Mth.floor(this.getBbHeight());
+
+            for (BlockPos blockpos : BlockPos.betweenClosed(
+                    this.getBlockX() - l, this.getBlockY(), this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + i1, this.getBlockZ() + l
+            )) {
+                BlockState blockstate = this.level().getBlockState(blockpos);
+                if (canDestroy(blockstate)) {
+                    flag = this.level().destroyBlock(blockpos, true, this) || flag;
+                }
+            }
+
+            if (flag) {
+                this.level().levelEvent(null, 1022, this.blockPosition(), 0);
+            }
+        }
+    }
+
+    public static boolean canDestroy(BlockState state) {
+        return !state.isAir() && !state.is(BlockTags.WITHER_IMMUNE);
+    }
+
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+        this.triggerAnim("controller", "spawn");
+        destroyBlocks();
+        buildCountdown = 120;
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     public void setAggro(Player aggro) {
@@ -154,7 +201,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         return BrainActivityGroup.idleTasks(
                 new FirstApplicableBehaviour<>(      // Run only one of the below behaviours, trying each one in order. Include the generic type because JavaC is silly
                         new TargetOrRetaliate<>()
-                                .attackablePredicate(entity -> tickCount > 120 && entity.isAlive() && (!(entity instanceof Player player) || !player.isCreative())),            // Set the attack target and walk target based on nearby entities
+                                .attackablePredicate(entity -> buildCountdown<=0 &&entity.isAlive() && (!(entity instanceof Player player) || !player.isCreative())),            // Set the attack target and walk target based on nearby entities
                         new SetPlayerLookTarget<>(),          // Set the look target for the nearest player
                         new SetRandomLookTarget<>()),         // Set a random look target
                 new OneRandomBehaviour<>(                 // Run a random task from the below options
@@ -168,21 +215,51 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
                 new InvalidateAttackTarget<>()
                         .invalidateIf((entity, target) -> target instanceof Player pl && (pl.isCreative() || pl.isSpectator())), // Cancel fighting if the target is no longer valid,
                 new SetWalkTargetToAttackTarget<>().speedMod((owner, target) -> 1f).closeEnoughDist((mob, living) -> {
-                    return 3;
+                    return 4;
                 }),      // Set the walk target to the attack target
 
 
-                new OneRandomBehaviour<>(
+                new FirstApplicableBehaviour<>(
+                        Pair.of(new LaserAttackBehavior(200)
+                                .attackInterval(mob -> 20)
+                                .whenStarting(cowMechEntity -> cowMechEntity.setLaserActive(true))
+                                .whenStopping(cowMechEntity -> {
+                            cowMechEntity.setLaserActive(false);
+                            cowMechEntity.laserCooldown = 200;
+                        }),1),
                         Pair.of(new AnimatableMeleeAttack<>(25) { // Melee attack the target if close enough
                             @Override
                             protected void start(Mob entity) {
                                 BehaviorUtils.lookAtEntity(entity, this.target);
                                 triggerAnim("controller", "slam");
                             }
-                        }.attackInterval(mob -> 400), 9),
-                        Pair.of(new LaserAttackBehavior(200),3)
+                        }.attackInterval(mob -> 37), 1)
                 )
         );
+    }
+
+    private static final double ATTACK_REACH = 1.5F;
+
+    @Override
+    protected AABB getAttackBoundingBox() {
+        Entity entity = this.getVehicle();
+        AABB aabb;
+        if (entity != null) {
+            AABB aabb1 = entity.getBoundingBox();
+            AABB aabb2 = this.getBoundingBox();
+            aabb = new AABB(
+                    Math.min(aabb2.minX, aabb1.minX),
+                    aabb2.minY,
+                    Math.min(aabb2.minZ, aabb1.minZ),
+                    Math.max(aabb2.maxX, aabb1.maxX),
+                    aabb2.maxY,
+                    Math.max(aabb2.maxZ, aabb1.maxZ)
+            );
+        } else {
+            aabb = this.getBoundingBox();
+        }
+
+        return aabb.inflate(ATTACK_REACH, .5, ATTACK_REACH);
     }
 
     @Override
@@ -194,6 +271,8 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
     protected void customServerAiStep() {
         super.customServerAiStep();
         tickBrain(this);
+        laserCooldown--;
+        buildCountdown--;
     }
 
     @Override
@@ -207,33 +286,27 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         }
     }
 
-    public class LaserAttackBehavior extends AnimatableRangedAttack<CowMechEntity> {
+    public static class LaserAttackBehavior extends AnimatableRangedAttack<CowMechEntity> {
         public LaserAttackBehavior(int delayTicks) {
             super(delayTicks);
             attackRadius(24);
         }
 
         @Override
-        protected void start(CowMechEntity entity) {
-            super.start(entity);
-            setLaserActive(true);
+        protected boolean checkExtraStartConditions(ServerLevel level, CowMechEntity entity) {
+            boolean b = super.checkExtraStartConditions(level,entity);
+            return b && entity.laserCooldown<=0;
         }
 
         @Override
         protected void tick(CowMechEntity entity) {
             super.tick(entity);
             if (target != null) {
-                setLaserTarget(target.position().add(0,target.getBbHeight()/2,0).toVector3f());
+                entity.setLaserTarget(target.position().add(0,target.getBbHeight()/2,0).toVector3f());
                 if (entity.tickCount%20 == 0) {
-                    performRangedAttack(target,1);
+                    entity.performRangedAttack(target,1);
                 }
             }
-        }
-
-        @Override
-        protected void stop(CowMechEntity entity) {
-            super.stop(entity);
-            setLaserActive(false);
         }
     }
 }

@@ -3,22 +3,25 @@ package tfar.idealist.world;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 import tfar.idealist.IdeaList;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ModSavedData extends SavedData {
 
     private final ServerLevel level;
     protected List<BlockPos> dont_grow = new ArrayList<>();
+
+    protected Set<UUID> joinedBefore = new HashSet<>();
 
     public ModSavedData(ServerLevel level) {
         this.level = level;
@@ -28,6 +31,8 @@ public class ModSavedData extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         Tag tag1 = BlockPos.CODEC.listOf().encodeStart(NbtOps.INSTANCE,dont_grow).resultOrPartial(IdeaList.LOG::error).orElseThrow();
         tag.put("dont_grow", tag1);
+        Tag tag2 = UUIDUtil.CODEC_SET.encodeStart(NbtOps.INSTANCE,joinedBefore).resultOrPartial(IdeaList.LOG::error).orElseThrow();
+        tag.put("joined_before",tag2);
         return tag;
     }
 
@@ -36,6 +41,15 @@ public class ModSavedData extends SavedData {
     public void addPos(BlockPos pos) {
         dont_grow.add(pos);
         setDirty();
+    }
+
+    public void addPlayer(ServerPlayer player) {
+        joinedBefore.add(player.getUUID());
+        setDirty();
+    }
+
+    public boolean hasJoinedBefore(ServerPlayer player) {
+        return joinedBefore.contains(player.getUUID());
     }
 
     public void removePos(BlockPos  pos) {
@@ -68,13 +82,14 @@ public class ModSavedData extends SavedData {
     }
 
     public static ModSavedData loadStatic(CompoundTag compoundTag, ServerLevel pLevel, HolderLookup.Provider registries) {
-        ModSavedData seedRaidData = new ModSavedData(pLevel);
-        seedRaidData.load(compoundTag,registries);
-        return seedRaidData;
+        ModSavedData modSavedData = new ModSavedData(pLevel);
+        modSavedData.load(compoundTag,registries);
+        return modSavedData;
     }
 
     protected void load(CompoundTag compoundTag, HolderLookup.Provider registries) {
         ListTag listTag = compoundTag.getList("dont_grow", Tag.TAG_COMPOUND);
-        dont_grow = new ArrayList<>(BlockPos.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, listTag)).resultOrPartial(IdeaList.LOG::error).get());
+        dont_grow = new ArrayList<>(BlockPos.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, listTag)).resultOrPartial(IdeaList.LOG::error).orElseThrow());
+        joinedBefore = UUIDUtil.CODEC_SET.parse(new Dynamic<>(NbtOps.INSTANCE,compoundTag.get("joined_before"))).resultOrPartial(IdeaList.LOG::error).orElseThrow();
     }
 }
