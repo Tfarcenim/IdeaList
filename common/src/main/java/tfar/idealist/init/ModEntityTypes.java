@@ -5,7 +5,8 @@ import net.minecraft.world.entity.MobCategory;
 import tfar.idealist.entity.*;
 
 public class ModEntityTypes {
-    public static final EntityType<AnimatedBlockEntity> ANIMATED_BLOCK = EntityType.Builder.of(AnimatedBlockEntity::new, MobCategory.CREATURE).sized(1,1).build("");
+    public static final EntityType<AnimatedBlockEntity> ANIMATED_BLOCK = EntityType.Builder.of(AnimatedBlockEntity::new, MobCategory.CREATURE)
+            .sized(.875f,1.5f).build("");
     public static final EntityType<WormEntity> WORM = EntityType.Builder.of(WormEntity::new,MobCategory.MONSTER)
             .sized(.9375f,.625f)
             .clientTrackingRange(8).build("");

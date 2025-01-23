@@ -59,6 +59,7 @@ import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -183,6 +184,7 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::eternalItems);
         NeoForge.EVENT_BUS.addListener(this::livingTick);
         NeoForge.EVENT_BUS.addListener(this::onDeath);
+        NeoForge.EVENT_BUS.addListener(this::playerTick);
     }
 
     void livingTick(EntityTickEvent.Post event) {
@@ -200,6 +202,13 @@ public class IdeaListNeoForge {
                     CowMechEntity spawn = ModEntityTypes.COW_MECH.spawn((ServerLevel) cow.level(), cow.blockPosition(), MobSpawnType.EVENT);
                 }
             }
+        }
+    }
+
+    void playerTick(PlayerTickEvent.Pre event) {
+        Player player = event.getEntity();
+        if (player instanceof ServerPlayer) {
+            player.setData(AttachmentTypes.PLAYER_BINGO_DATA,player.getData(AttachmentTypes.PLAYER_BINGO_DATA).tickCooldowns());
         }
     }
 
@@ -297,13 +306,15 @@ public class IdeaListNeoForge {
         Entity attacker = source.getEntity();
 
         if (attacker instanceof Player playerAttacker && target instanceof Cow cow) {
-            if (playerAttacker.getData(AttachmentTypes.PLAYER_BINGO_DATA).twist()) {
+            PlayerBingoData playerBingoData = playerAttacker.getData(AttachmentTypes.PLAYER_BINGO_DATA);
+            if (playerBingoData.twist() && playerBingoData.cow_mech_cooldown() <=0) {
                 cow.getNavigation().stop();
                 cow.getLookControl().setLookAt(playerAttacker);
                 event.setCanceled(true);
+                cow.setInvulnerable(true);
 
                 ExtraCowData data = cow.getData(AttachmentTypes.EXTRA_COW_DATA);
-                if (data.morph_countdown() < 0 && cow.tickCount > 400) {
+                if (data.morph_countdown() < 0) {
 
                     BlockPos cowPos = cow.blockPosition();
                     for (int i = 0; i < 15; i++) {
@@ -313,6 +324,8 @@ public class IdeaListNeoForge {
                         EntityType.COW.spawn((ServerLevel) cow.level(), spawn, MobSpawnType.EVENT);
                     }
                     cow.setData(AttachmentTypes.EXTRA_COW_DATA, new ExtraCowData(200));
+                    playerAttacker.setData(AttachmentTypes.PLAYER_BINGO_DATA,
+                            playerAttacker.getData(AttachmentTypes.PLAYER_BINGO_DATA).setCowMechCooldown(20 * 60 * 2));
                 }
             }
         }

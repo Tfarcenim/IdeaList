@@ -9,10 +9,12 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
+import tfar.idealist.network.PacketHandler;
 
 import java.util.UUID;
 
-public record PlayerBingoData(boolean twist, int shot_count, Vec3 seed_return_pos, BlockPos seed_pos, QuizData quiz_data,Vec3 piglin_parkour_return_pos) {
+public record PlayerBingoData(boolean twist, int shot_count, Vec3 seed_return_pos, BlockPos seed_pos,
+                              QuizData quiz_data,Vec3 piglin_parkour_return_pos,int cow_mech_cooldown) {
 
     public record QuizData(BlockPos deferred_end_portal, int question, UUID enderman) {
         public static final Codec<QuizData> CODEC = RecordCodecBuilder.create(playerBingoDataInstance ->
@@ -52,57 +54,72 @@ public record PlayerBingoData(boolean twist, int shot_count, Vec3 seed_return_po
                     Vec3.CODEC.fieldOf("seed_return_pos").forGetter(PlayerBingoData::seed_return_pos),
                     BlockPos.CODEC.fieldOf("seed_pos").forGetter(PlayerBingoData::seed_pos),
                     QuizData.CODEC.fieldOf("quiz_data").forGetter(PlayerBingoData::quiz_data),
-                    Vec3.CODEC.fieldOf("piglin_parkour_return_pos").forGetter(PlayerBingoData::piglin_parkour_return_pos)
+                    Vec3.CODEC.fieldOf("piglin_parkour_return_pos").forGetter(PlayerBingoData::piglin_parkour_return_pos),
+                    Codec.INT.fieldOf("cow_mech_cooldown").forGetter(PlayerBingoData::cow_mech_cooldown)
             ).apply(playerBingoDataInstance,PlayerBingoData::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf,PlayerBingoData> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf,PlayerBingoData> STREAM_CODEC = PacketHandler.composite(
             ByteBufCodecs.BOOL,PlayerBingoData::twist,
             ByteBufCodecs.INT,PlayerBingoData::shot_count,
             IdeaList.VEC3_STREAM_CODEC,PlayerBingoData::seed_return_pos,
             BlockPos.STREAM_CODEC,PlayerBingoData::seed_pos,
             QuizData.STREAM_CODEC,PlayerBingoData::quiz_data,
             IdeaList.VEC3_STREAM_CODEC,PlayerBingoData::piglin_parkour_return_pos,
+            ByteBufCodecs.INT,PlayerBingoData::cow_mech_cooldown,
             PlayerBingoData::new
     );
 
     public PlayerBingoData() {
-        this(true,0,Vec3.ZERO,BlockPos.ZERO,new QuizData(BlockPos.ZERO,-1, Util.NIL_UUID),Vec3.ZERO);
+        this(true,0,Vec3.ZERO,BlockPos.ZERO,new QuizData(BlockPos.ZERO,-1, Util.NIL_UUID),Vec3.ZERO,0);
     }
 
     public PlayerBingoData withTwist(boolean twist) {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData incrementShot() {
-        return new PlayerBingoData(twist,shot_count+1, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count+1, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData setSeedReturnPos(Vec3 pos) {
-        return new PlayerBingoData(twist,shot_count,pos,seed_pos,quiz_data,piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count,pos,seed_pos,quiz_data,piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData setSeedPos(BlockPos pos) {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,pos,quiz_data,piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,pos,quiz_data,piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData setDeferredEndPortalPos(BlockPos pos) {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.setDeferredEndPortalPos(pos),piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.setDeferredEndPortalPos(pos),piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData incrementQuestion() {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.incrementQuestion(),piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.incrementQuestion(),piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData resetQuestions() {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.resetQuestions(),piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.resetQuestions(),piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData setEnderman(UUID uuid) {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.setEnderman(uuid),piglin_parkour_return_pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data.setEnderman(uuid),piglin_parkour_return_pos,cow_mech_cooldown);
     }
 
     public PlayerBingoData setPiglinParkourReturnPos(Vec3 pos) {
-        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,pos);
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,pos,cow_mech_cooldown);
+    }
+
+    public PlayerBingoData setCowMechCooldown(int ticks) {
+        return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos,ticks);
+    }
+
+    public PlayerBingoData tickCooldowns() {
+        boolean reduceCowMech = cow_mech_cooldown > 0;
+        if (reduceCowMech) {
+            return new PlayerBingoData(twist,shot_count, seed_return_pos,seed_pos,quiz_data,piglin_parkour_return_pos
+                    ,reduceCowMech ?  cow_mech_cooldown - 1:cow_mech_cooldown);
+        }
+        return this;
     }
 
 }

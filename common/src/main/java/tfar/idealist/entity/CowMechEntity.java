@@ -123,7 +123,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         if (deathTime == 1) {
             this.triggerAnim("controller", "death");
         }
-        if (this.deathTime >= 32 && !isRemoved() && !level().isClientSide) {
+        if (this.deathTime >= 35 && !isRemoved() && !level().isClientSide) {
             this.level().broadcastEntityEvent(this, EntityEvent.POOF);
             this.remove(RemovalReason.KILLED);
         }
@@ -238,7 +238,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
         );
     }
 
-    private static final double ATTACK_REACH = 1.5F;
+    private static final double ATTACK_REACH = 2F;
 
     @Override
     protected AABB getAttackBoundingBox() {

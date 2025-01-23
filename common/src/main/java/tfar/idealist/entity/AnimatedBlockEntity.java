@@ -11,12 +11,16 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -55,12 +59,13 @@ public class AnimatedBlockEntity extends PathfinderMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
+        this.goalSelector.addGoal(1, new EnhancedPanicGoal(this, 2));
 
     }
 
     public static AttributeSupplier.Builder create() {
-        return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH,20).add(Attributes.MOVEMENT_SPEED,.4);
+        return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH,20)
+                .add(Attributes.MOVEMENT_SPEED,.4);
     }
 
     public void setStartPos(BlockPos startPos) {
@@ -82,6 +87,11 @@ public class AnimatedBlockEntity extends PathfinderMob {
         builder.define(DATA_START_POS, BlockPos.ZERO);
     }
 
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, damageSource, recentlyHit);
+        ItemEntity itementity = this.spawnAtLocation(Items.DIAMOND);
+    }
 
     public BlockState getBlockState() {
         return blockState;

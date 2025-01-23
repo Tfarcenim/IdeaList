@@ -1,5 +1,6 @@
 package tfar.idealist.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.DisplayInfo;
@@ -18,6 +19,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,27 +91,31 @@ public class SimpleAdvancementWidget extends AbstractWidget {
     }
 
     public void drawHover(GuiGraphics guiGraphics,int mouseX,int mouseY,DisplayInfo info,AdvancementProgress progress) {
-        /*boolean flag = width + x + this.x + this.width + 26 >= this.tab.getScreen().width;
-        Component component = this.progress == null ? null : this.progress.getProgressText();
-        int i = component == null ? 0 : this.minecraft.font.width(component);
-        boolean flag1 = 113 - y - this.y - 26 <= 6 + this.description.size() * 9;
-        float f = this.progress == null ? 0.0F : this.progress.getPercent();
-        int j = Mth.floor(f * (float)this.width);
+        boolean flag = this.getX() + this.width + 26 >= Minecraft.getInstance().screen.width;
+
+        int tooltipX = (this.width - 92) / 2;
+        int tooltipY = (this.height - 86) / 2;
+
+        Component component = progress == null ? null : progress.getProgressText();
+        int i = component == null ? 0 : font.width(component);
+        boolean flag1 = 113 - this.getY() - 26 <= 6 + this.description.size() * 9;
+        float f = progress == null ? 0.0F : progress.getPercent();
+        int progressPercent = Mth.floor(f * (float)this.width);
         AdvancementWidgetType advancementwidgettype;
         AdvancementWidgetType advancementwidgettype1;
         AdvancementWidgetType advancementwidgettype2;
         if (f >= 1.0F) {
-            j = this.width / 2;
+            progressPercent = this.width / 2;
             advancementwidgettype = AdvancementWidgetType.OBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.OBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.OBTAINED;
-        } else if (j < 2) {
-            j = this.width / 2;
+        } else if (progressPercent < 2) {
+            progressPercent = this.width / 2;
             advancementwidgettype = AdvancementWidgetType.UNOBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.UNOBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
-        } else if (j > this.width - 2) {
-            j = this.width / 2;
+        } else if (progressPercent > this.width - 2) {
+            progressPercent = this.width / 2;
             advancementwidgettype = AdvancementWidgetType.OBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.OBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
@@ -119,14 +125,14 @@ public class SimpleAdvancementWidget extends AbstractWidget {
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
         }
 
-        int k = this.width - j;
+        int k = this.width - progressPercent;
         RenderSystem.enableBlend();
-        int l = y + this.y;
+        int l = this.getY();
         int i1;
         if (flag) {
-            i1 = x + this.x - this.width + 26 + 6;
+            i1 = this.getX() - this.width + 26 + 6;
         } else {
-            i1 = x + this.x;
+            i1 = this.getX();
         }
 
         int j1 = 32 + this.description.size() * 9;
@@ -138,32 +144,32 @@ public class SimpleAdvancementWidget extends AbstractWidget {
             }
         }
 
-        guiGraphics.blitSprite(advancementwidgettype.boxSprite(), 200, 26, 0, 0, i1, l, j, 26);
-        guiGraphics.blitSprite(advancementwidgettype1.boxSprite(), 200, 26, 200 - k, 0, i1 + j, l, k, 26);
-        guiGraphics.blitSprite(advancementwidgettype2.frameSprite(this.display.getType()), x + this.x + 3, y + this.y, 26, 26);
+        guiGraphics.blitSprite(advancementwidgettype.boxSprite(), 200, 26, 0, 0, i1, l, progressPercent, 26);
+        guiGraphics.blitSprite(advancementwidgettype1.boxSprite(), 200, 26, 200 - k, 0, i1 + progressPercent, l, k, 26);
+        guiGraphics.blitSprite(advancementwidgettype2.frameSprite(this.display.getType()), this.getX() + 3, this.getY(), 26, 26);
         if (flag) {
-            guiGraphics.drawString(this.minecraft.font, this.title, i1 + 5, y + this.y + 9, -1);
+            guiGraphics.drawString(font, this.title, i1 + 5, this.getY() + 9, -1);
             if (component != null) {
-                guiGraphics.drawString(this.minecraft.font, component, x + this.x - i, y + this.y + 9, -1);
+                guiGraphics.drawString(font, component, this.getX() - i, this.getY() + 9, -1);
             }
         } else {
-            guiGraphics.drawString(this.minecraft.font, this.title, x + this.x + 32, y + this.y + 9, -1);
+            guiGraphics.drawString(font, this.title, this.getX() + 32,  this.getY() + 9, -1);
             if (component != null) {
-                guiGraphics.drawString(this.minecraft.font, component, x + this.x + this.width - i - 5, y + this.y + 9, -1);
+                guiGraphics.drawString(font, component, this.getX() + this.width - i - 5, this.getY() + 9, -1);
             }
         }
 
         if (flag1) {
             for (int k1 = 0; k1 < this.description.size(); k1++) {
-                guiGraphics.drawString(this.minecraft.font, this.description.get(k1), i1 + 5, l + 26 - j1 + 7 + k1 * 9, -5592406, false);
+                guiGraphics.drawString(font, this.description.get(k1), i1 + 5, l + 26 - j1 + 7 + k1 * 9, -5592406, false);
             }
         } else {
             for (int l1 = 0; l1 < this.description.size(); l1++) {
-                guiGraphics.drawString(this.minecraft.font, this.description.get(l1), i1 + 5, y + this.y + 9 + 17 + l1 * 9, -5592406, false);
+                guiGraphics.drawString(font, this.description.get(l1), i1 + 5, getY() + this.getY() + 9 + 17 + l1 * 9, -5592406, false);
             }
         }
 
-        guiGraphics.renderFakeItem(this.display.getIcon(), x + this.x + 8, y + this.y + 5);*/
+        guiGraphics.renderFakeItem(this.display.getIcon(), this.getX() + 8, this.getY() + 5);
     }
 
     private static final int[] TEST_SPLIT_OFFSETS = new int[]{0, 10, -10, 25, -25};
