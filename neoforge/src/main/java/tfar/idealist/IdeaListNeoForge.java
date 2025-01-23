@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +15,7 @@ import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,10 +29,13 @@ import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +68,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import oshi.jna.platform.windows.NtDll;
 import tfar.idealist.client.ModClientNeoForge;
 import tfar.idealist.datagen.ModDatagen;
 import tfar.idealist.entity.*;
@@ -155,13 +161,22 @@ public class IdeaListNeoForge {
         ModSavedData modSavedData = ModSavedData.getOrLoad(player.server.overworld());
         if (!modSavedData.hasJoinedBefore(player)) {
             modSavedData.addPlayer(player);
-            player.addItem(ModItems.BINGO_CARD.getDefaultInstance());
+            ItemStack bingoCard = bingoCard(player.serverLevel());
+            player.addItem(bingoCard);
         }
 
 
         PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), player);
     }
 
+    static ItemStack bingoCard(Level level) {
+        ItemStack bingoCard = ModItems.BINGO_CARD.getDefaultInstance();
+        bingoCard.enchant(level.registryAccess().registry(Registries.ENCHANTMENT).get()
+                .getHolderOrThrow(Enchantments.VANISHING_CURSE),1);
+        bingoCard.set(DataComponents.ENCHANTMENTS,bingoCard.getEnchantments().withTooltip(false));
+        bingoCard.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE,false);
+        return bingoCard;
+    }
 
     void setup(FMLCommonSetupEvent event) {
         registerLater.clear();
@@ -215,6 +230,10 @@ public class IdeaListNeoForge {
     void spawn(PlayerEvent.PlayerRespawnEvent event) {
         Player player = event.getEntity();
         PacketHandler.sendTo(new S2CAttachmentDataPacket(player.getData(AttachmentTypes.PLAYER_BINGO_DATA)), (ServerPlayer) player);
+        if (!event.isEndConquered()) {
+            ItemStack bingoCard = bingoCard(player.level());
+            player.addItem(bingoCard);
+        }
     }
 
     void eternalItems(EntityJoinLevelEvent event) {

@@ -91,31 +91,31 @@ public class SimpleAdvancementWidget extends AbstractWidget {
     }
 
     public void drawHover(GuiGraphics guiGraphics,int mouseX,int mouseY,DisplayInfo info,AdvancementProgress progress) {
-        boolean flag = this.getX() + this.width + 26 >= Minecraft.getInstance().screen.width;
+        boolean flag = this.getX() + this.tooltipWidth + 26 >= guiGraphics.guiWidth();
 
         int tooltipX = (this.width - 92) / 2;
-        int tooltipY = (this.height - 86) / 2;
+        int tooltipY = guiGraphics.guiHeight() / 2 - 75;
 
         Component component = progress == null ? null : progress.getProgressText();
         int i = component == null ? 0 : font.width(component);
         boolean flag1 = 113 - this.getY() - 26 <= 6 + this.description.size() * 9;
         float f = progress == null ? 0.0F : progress.getPercent();
-        int progressPercent = Mth.floor(f * (float)this.width);
+        int progressPercent = Mth.floor(f * (float)this.tooltipWidth);
         AdvancementWidgetType advancementwidgettype;
         AdvancementWidgetType advancementwidgettype1;
         AdvancementWidgetType advancementwidgettype2;
         if (f >= 1.0F) {
-            progressPercent = this.width / 2;
+            progressPercent = this.tooltipWidth / 2;
             advancementwidgettype = AdvancementWidgetType.OBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.OBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.OBTAINED;
         } else if (progressPercent < 2) {
-            progressPercent = this.width / 2;
+            progressPercent = this.tooltipWidth / 2;
             advancementwidgettype = AdvancementWidgetType.UNOBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.UNOBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
-        } else if (progressPercent > this.width - 2) {
-            progressPercent = this.width / 2;
+        } else if (progressPercent > this.tooltipWidth - 2) {
+            progressPercent = this.tooltipWidth / 2;
             advancementwidgettype = AdvancementWidgetType.OBTAINED;
             advancementwidgettype1 = AdvancementWidgetType.OBTAINED;
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
@@ -125,12 +125,11 @@ public class SimpleAdvancementWidget extends AbstractWidget {
             advancementwidgettype2 = AdvancementWidgetType.UNOBTAINED;
         }
 
-        int k = this.width - progressPercent;
+        int k = this.tooltipWidth - progressPercent;
         RenderSystem.enableBlend();
-        int l = this.getY();
         int i1;
         if (flag) {
-            i1 = this.getX() - this.width + 26 + 6;
+            i1 = this.getX() - this.tooltipWidth + 26 + 6;
         } else {
             i1 = this.getX();
         }
@@ -138,38 +137,38 @@ public class SimpleAdvancementWidget extends AbstractWidget {
         int j1 = 32 + this.description.size() * 9;
         if (!this.description.isEmpty()) {
             if (flag1) {
-                guiGraphics.blitSprite(TITLE_BOX_SPRITE, i1, l + 26 - j1, this.width, j1);
+                guiGraphics.blitSprite(TITLE_BOX_SPRITE, i1, tooltipY + 26 - j1, this.tooltipWidth, j1);
             } else {
-                guiGraphics.blitSprite(TITLE_BOX_SPRITE, i1, l, this.width, j1);
+                guiGraphics.blitSprite(TITLE_BOX_SPRITE, i1, tooltipY, this.tooltipWidth, j1);
             }
         }
 
-        guiGraphics.blitSprite(advancementwidgettype.boxSprite(), 200, 26, 0, 0, i1, l, progressPercent, 26);
-        guiGraphics.blitSprite(advancementwidgettype1.boxSprite(), 200, 26, 200 - k, 0, i1 + progressPercent, l, k, 26);
-        guiGraphics.blitSprite(advancementwidgettype2.frameSprite(this.display.getType()), this.getX() + 3, this.getY(), 26, 26);
+        guiGraphics.blitSprite(advancementwidgettype.boxSprite(), 200, 26, 0, 0, i1, tooltipY, progressPercent, 26);
+        guiGraphics.blitSprite(advancementwidgettype1.boxSprite(), 200, 26, 200 - k, 0, i1 + progressPercent, tooltipY, k, 26);
+        guiGraphics.blitSprite(advancementwidgettype2.frameSprite(this.display.getType()), this.getX() + 3, tooltipY, 26, 26);
         if (flag) {
-            guiGraphics.drawString(font, this.title, i1 + 5, this.getY() + 9, -1);
+            guiGraphics.drawString(font, this.title, i1 + 5, tooltipY + 9, 0xffffffff);
             if (component != null) {
-                guiGraphics.drawString(font, component, this.getX() - i, this.getY() + 9, -1);
+                guiGraphics.drawString(font, component, this.getX() - i, tooltipY + 9, 0xffffffff);
             }
         } else {
-            guiGraphics.drawString(font, this.title, this.getX() + 32,  this.getY() + 9, -1);
+            guiGraphics.drawString(font, this.title, this.getX() + 32,  tooltipY + 9, 0xffffffff);
             if (component != null) {
-                guiGraphics.drawString(font, component, this.getX() + this.width - i - 5, this.getY() + 9, -1);
+                guiGraphics.drawString(font, component, this.getX() + this.tooltipWidth - i - 5, tooltipY + 9, 0xffffffff);
             }
         }
 
         if (flag1) {
             for (int k1 = 0; k1 < this.description.size(); k1++) {
-                guiGraphics.drawString(font, this.description.get(k1), i1 + 5, l + 26 - j1 + 7 + k1 * 9, -5592406, false);
+                guiGraphics.drawString(font, this.description.get(k1), i1 + 5, tooltipY + 26 - j1 + 7 + k1 * 9, 0xffaaaaaa, false);
             }
         } else {
             for (int l1 = 0; l1 < this.description.size(); l1++) {
-                guiGraphics.drawString(font, this.description.get(l1), i1 + 5, getY() + this.getY() + 9 + 17 + l1 * 9, -5592406, false);
+                guiGraphics.drawString(font, this.description.get(l1), i1 + 5, getY() + tooltipY + 9 + 17 + l1 * 9, 0xffaaaaaa, false);
             }
         }
 
-        guiGraphics.renderFakeItem(this.display.getIcon(), this.getX() + 8, this.getY() + 5);
+        guiGraphics.renderFakeItem(this.display.getIcon(), this.getX() + 8, tooltipY + 5);
     }
 
     private static final int[] TEST_SPLIT_OFFSETS = new int[]{0, 10, -10, 25, -25};
