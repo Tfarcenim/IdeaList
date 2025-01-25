@@ -92,7 +92,7 @@ public class IdeaConfig {
             SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(-1, 64, 1));
 
             PIGLIN_PARKOUR_PLAYER_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_player_teleport",Vec3.CODEC,new Vec3(.5, 64, .5));
-            PIGLIN_PARKOUR_PIGLIN_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_piglin_teleport",Vec3.CODEC,new Vec3(47, 62, 1));
+            PIGLIN_PARKOUR_PIGLIN_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_piglin_teleport",Vec3.CODEC,new Vec3(47, 65, .5));
 
             QUESTION_0 = ConfigHelper.defineObject(builder,"question_0",QandA.CODEC,Defaults.Q0);
             QUESTION_1 = ConfigHelper.defineObject(builder,"question_1",QandA.CODEC,Defaults.Q1);

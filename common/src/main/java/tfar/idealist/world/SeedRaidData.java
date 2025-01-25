@@ -229,6 +229,11 @@ public class SeedRaidData extends SavedData {
 
     public void updateSeedEntity(SeedEntity seedEntity) {
         this.seedEntity = seedEntity;
+        waveEntities.forEach(e -> {
+            if (e instanceof WormEntity) {
+                e.setTarget(seedEntity);
+            }
+        });
     }
 
     record Wave(Object2IntMap<EntityType<? extends Mob>> mobs) {
