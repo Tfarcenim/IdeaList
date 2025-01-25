@@ -14,31 +14,31 @@ public class ModEntityTypes {
     public static final EntityType<SparrowEntity> SPARROW = EntityType.Builder.of(SparrowEntity::new,MobCategory.MONSTER).sized(2.5f,2.5f).clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_1 = EntityType.Builder.of(SeedEntity::createSeed1,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(.875f,1)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_1_TO_2 = EntityType.Builder.of(SeedEntity::createSeed1to2,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(.875f,1)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_2 = EntityType.Builder.of(SeedEntity::createSeed2,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(1,2)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_2_TO_3 = EntityType.Builder.of(SeedEntity::createSeed2to3,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(1,2)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_3 = EntityType.Builder.of(SeedEntity::createSeed3,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(1,3)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_3_TO_4 = EntityType.Builder.of(SeedEntity::createSeed3to4,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(1,3)
             .clientTrackingRange(8).build("");
 
     public static final EntityType<SeedEntity> SEED_4 = EntityType.Builder.of(SeedEntity::createSeed4,MobCategory.MISC)
-            .sized(1,5f)
+            .sized(1,4)
             .clientTrackingRange(8).build("");
 
 

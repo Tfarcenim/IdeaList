@@ -1,6 +1,7 @@
 package tfar.idealist;
 
 
+import com.sk89q.worldedit.neoforge.ThreadSafeCache;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -11,6 +12,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,9 +64,11 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.block.CropGrowEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -200,7 +204,22 @@ public class IdeaListNeoForge {
         NeoForge.EVENT_BUS.addListener(this::livingTick);
         NeoForge.EVENT_BUS.addListener(this::onDeath);
         NeoForge.EVENT_BUS.addListener(this::playerTick);
+        NeoForge.EVENT_BUS.addListener(this::serverTick);
     }
+
+    void serverStart(ServerStartedEvent event) {
+
+    }
+
+    void serverTick(ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        ModSavedData modSavedData = ModSavedData.getOrLoad(server.overworld());
+        if (modSavedData.isFirstStart() && ThreadSafeCache.getInstance().getOnlineIds() != null) {
+            SchematicPaster.init(server);
+            modSavedData.setFirstStart();
+        }
+    }
+
 
     void livingTick(EntityTickEvent.Post event) {
         if (event.getEntity() instanceof Cow cow && !cow.level().isClientSide) {

@@ -89,9 +89,9 @@ public class IdeaConfig {
             BINGO_ADVANCEMENT_7 = builder.define("bingo_advancement_7", Defaults.COMPLETE_A_RAID.toString());
             BINGO_ADVANCEMENT_8 = builder.define("bingo_advancement_8", Defaults.GROW_WHEAT.toString());
 
-            SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
+            SEED_TELEPORT = ConfigHelper.defineObject(builder,"seed_teleport",Vec3.CODEC,new Vec3(-1, 64, 1));
 
-            PIGLIN_PARKOUR_PLAYER_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_player_teleport",Vec3.CODEC,new Vec3(0, 64, 1));
+            PIGLIN_PARKOUR_PLAYER_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_player_teleport",Vec3.CODEC,new Vec3(.5, 64, .5));
             PIGLIN_PARKOUR_PIGLIN_TELEPORT = ConfigHelper.defineObject(builder,"piglin_parkour_piglin_teleport",Vec3.CODEC,new Vec3(47, 62, 1));
 
             QUESTION_0 = ConfigHelper.defineObject(builder,"question_0",QandA.CODEC,Defaults.Q0);

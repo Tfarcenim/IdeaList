@@ -86,7 +86,7 @@ public class CowMechEntity extends PathfinderMob implements GeoEntity, RangedAtt
 
     public static AttributeSupplier.Builder attributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.ATTACK_DAMAGE,5)
+                .add(Attributes.ATTACK_DAMAGE,6)
                 .add(Attributes.FOLLOW_RANGE,24)
                 .add(Attributes.MAX_HEALTH,150)
                 .add(Attributes.MOVEMENT_SPEED,.2)

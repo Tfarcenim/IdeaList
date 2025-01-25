@@ -23,6 +23,8 @@ public class ModSavedData extends SavedData {
 
     protected Set<UUID> joinedBefore = new HashSet<>();
 
+    protected boolean firstStart = true;
+
     public ModSavedData(ServerLevel level) {
         this.level = level;
     }
@@ -33,6 +35,7 @@ public class ModSavedData extends SavedData {
         tag.put("dont_grow", tag1);
         Tag tag2 = UUIDUtil.CODEC_SET.encodeStart(NbtOps.INSTANCE,joinedBefore).resultOrPartial(IdeaList.LOG::error).orElseThrow();
         tag.put("joined_before",tag2);
+        tag.putBoolean("first_start",firstStart);
         return tag;
     }
 
@@ -59,6 +62,15 @@ public class ModSavedData extends SavedData {
 
     public boolean growthBlocked(BlockPos pos) {
         return dont_grow.contains(pos);
+    }
+
+    public boolean isFirstStart() {
+        return firstStart;
+    }
+
+    public void setFirstStart() {
+        firstStart = false;
+        setDirty();
     }
 
     @Nullable
@@ -91,5 +103,6 @@ public class ModSavedData extends SavedData {
         ListTag listTag = compoundTag.getList("dont_grow", Tag.TAG_COMPOUND);
         dont_grow = new ArrayList<>(BlockPos.CODEC.listOf().parse(new Dynamic<>(NbtOps.INSTANCE, listTag)).resultOrPartial(IdeaList.LOG::error).orElseThrow());
         joinedBefore = UUIDUtil.CODEC_SET.parse(new Dynamic<>(NbtOps.INSTANCE,compoundTag.get("joined_before"))).resultOrPartial(IdeaList.LOG::error).orElseThrow();
+        firstStart = compoundTag.getBoolean("first_start");
     }
 }
