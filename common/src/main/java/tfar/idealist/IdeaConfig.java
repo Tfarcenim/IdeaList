@@ -3,9 +3,9 @@ package tfar.idealist;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,20 +39,34 @@ public class IdeaConfig {
         public static final ResourceLocation COMPLETE_A_RAID = IdeaList.id("complete_a_raid");
         public static final ResourceLocation GROW_WHEAT = IdeaList.id("grow_wheat");
 
-        public static final QandA Q0 = new QandA("What color is a Minecraft pig?", Sets.newHashSet("pink"));
+        public static final QandA Q0 = new QandA("What color is a Minecraft pig?", newHashSet("pink"));
 
 
 
         public static final QandA Q1 = new QandA("Which mineral can generate naturally in both the Overworld and the Nether?",
-                Sets.newHashSet("gold","au"));
+                newHashSet("gold","au"));
 
-        public static final QandA Q2 = new QandA("Which of these mobs has the most health points?",Sets.newHashSet("warden"));
+        public static final QandA Q2 = new QandA("Which of these mobs has the most health points?",newHashSet("warden"));
 
 
-        public static final QandA Q3 = new QandA("How many music discs are in the game?",Sets.newHashSet("fifteen","15"));
+        public static final QandA Q3 = new QandA("How many music discs are in the game?",newHashSet("fifteen","15"));
 
-        public static final QandA Q4 = new QandA("What is Walter white's age in season 3 of breaking bad?",Sets.newHashSet("fifty","50"));
+        public static final QandA Q4 = new QandA("What is Walter white's age in season 3 of breaking bad?",newHashSet("fifty","50"));
 
+    }
+
+    /**
+     * Creates a new HashSet filled with the given elements
+     *
+     * @param elements the elements to fill the new set
+     * @param <E>      type of elements contained in new set
+     * @return A new HasSet
+     */
+    @SafeVarargs
+    public static <E> HashSet<E> newHashSet(final E... elements) {
+        final HashSet<E> set = new HashSet<>(elements.length);
+        Collections.addAll(set, elements);
+        return set;
     }
 
     public static class Server {

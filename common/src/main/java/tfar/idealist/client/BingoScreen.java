@@ -62,8 +62,6 @@ public class BingoScreen extends Screen {
         int x = (this.width - size) / 2;
         int y = (this.height - size) / 2;
         guiGraphics.blitSprite(BINGO,x,y,size,size);
-
-
     }
 
     @Override

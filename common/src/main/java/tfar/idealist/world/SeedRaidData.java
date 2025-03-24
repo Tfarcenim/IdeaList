@@ -204,7 +204,7 @@ public class SeedRaidData extends SavedData {
         while (y > level.getMinBuildHeight()) {
             containing = new BlockPos(containing.getX(),y,containing.getZ());
             BlockState state = level.getBlockState(containing);
-            if (!state.isAir() && !state.is(Blocks.BARRIER) && !state.is(Blocks.LIGHT)) {
+            if (!state.isAir() && !state.is(Blocks.BARRIER) && !state.is(Blocks.LIGHT) && !state.is(Blocks.LIME_WOOL) ) {
                 break;
             }
             y--;
